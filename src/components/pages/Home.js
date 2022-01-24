@@ -20,52 +20,6 @@ const Home= () => (
          <SliderMainParticleGrey/>
       </section>
 
-      <section className='container no-bottom'>
-        <div className="row">
-            <div className="col-lg-2 col-sm-4 col-6 mb30">
-                <span className="box-url">
-                    <img src="./img/wallet/1.png" alt="" className="mb20"/>
-                    <h4>Metamask</h4>
-                </span>
-            </div>
-
-            <div className="col-lg-2 col-sm-4 col-6 mb30">
-                <span className="box-url">
-                    <img src="./img/wallet/2.png" alt="" className="mb20"/>
-                    <h4>Bitski</h4>
-                </span>
-            </div>       
-
-            <div className="col-lg-2 col-sm-4 col-6 mb30">
-                <span className="box-url">
-                    <img src="./img/wallet/3.png" alt="" className="mb20"/>
-                    <h4>Fortmatic</h4>
-                </span>
-            </div>    
-
-            <div className="col-lg-2 col-sm-4 col-6 mb30">
-                <span className="box-url">
-                    <img src="./img/wallet/4.png" alt="" className="mb20"/>
-                    <h4>WalletConnect</h4>
-                </span>
-            </div>
-
-            <div className="col-lg-2 col-sm-4 col-6 mb30">
-                <span className="box-url">
-                    <img src="./img/wallet/5.png" alt="" className="mb20"/>
-                    <h4>Coinbase Wallet</h4>
-                </span>
-            </div>
-
-            <div className="col-lg-2 col-sm-4 col-6 mb30">
-                <span className="box-url">
-                    <img src="./img/wallet/6.png" alt="" className="mb20"/>
-                    <h4>Arkane</h4>
-                </span>
-            </div>                                       
-        </div>
-      </section>
-
       <section className='container no-top no-bottom'>
         <div className='row'>
           <div className="spacer-double"></div>

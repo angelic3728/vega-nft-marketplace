@@ -80,8 +80,8 @@ const Header = function ({ className }) {
             <div className="navbar-title navbar-item">
               <NavLink to="/">
                 <img
-                  src="/img/logo.png"
-                  className="img-fluid d-block"
+                  src="/img/logos/logo-red.png"
+                  height="55px"
                   alt="#"
                 />
               </NavLink>
@@ -102,27 +102,46 @@ const Header = function ({ className }) {
             <Breakpoint l down>
               {showmenu && (
                 <div className="menu">
-                  <div className="menu">
-                    <div className="navbar-item">
-                      <NavLink
-                        to="/explore"
-                        onClick={() => btn_icon(!showmenu)}
+                  <div className="navbar-item">
+                    <NavLink to="/explore" onClick={() => btn_icon(!showmenu)}>
+                      Explore
+                      <span className="lines"></span>
+                    </NavLink>
+                  </div>
+                  <div className="navbar-item">
+                    <NavLink to="/create" onClick={() => btn_icon(!showmenu)}>
+                      Create
+                      <span className="lines"></span>
+                    </NavLink>
+                  </div>
+                  <div className="navbar-item">
+                    <div ref={ref}>
+                      <div
+                        className="dropdown-custom dropdown-toggle btn"
+                        onMouseEnter={handleBtnClick}
+                        onMouseLeave={closeMenu}
                       >
-                        Explore
-                      </NavLink>
-                    </div>
-                    <div className="navbar-item">
-                      <NavLink to="/create" onClick={() => btn_icon(!showmenu)}>
-                        Create
-                      </NavLink>
-                    </div>
-                    <div className="navbar-item">
-                      <NavLink
-                        to="/activity"
-                        onClick={() => btn_icon(!showmenu)}
-                      >
-                        Activity
-                      </NavLink>
+                        Stats
+                        <span className="lines"></span>
+                        {openMenu && (
+                          <div className="item-dropdown">
+                            <div className="dropdown" onClick={closeMenu}>
+                              <NavLink
+                                to="/rankings"
+                                onClick={() => btn_icon(!showmenu)}
+                              >
+                                Rankings
+                              </NavLink>
+                              <NavLink
+                                to="/activity"
+                                onClick={() => btn_icon(!showmenu)}
+                              >
+                                Activity
+                              </NavLink>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -135,38 +154,44 @@ const Header = function ({ className }) {
                   <div className="navbar-item">
                     <NavLink to="/explore" onClick={() => btn_icon(!showmenu)}>
                       Explore
+                      <span className="lines"></span>
                     </NavLink>
                   </div>
                   <div className="navbar-item">
                     <NavLink to="/create" onClick={() => btn_icon(!showmenu)}>
                       Create
+                      <span className="lines"></span>
                     </NavLink>
                   </div>
-                  <div ref={ref}>
-                    <div
-                      className="dropdown-custom dropdown-toggle btn"
-                      onClick={handleBtnClick}
-                    >
-                      Stats
-                    </div>
-                    {openMenu && (
-                      <div className="item-dropdown">
-                        <div className="dropdown" onClick={closeMenu}>
-                          <NavLink
-                            to="/rankings"
-                            onClick={() => btn_icon(!showmenu)}
-                          >
-                            Rankings
-                          </NavLink>
-                          <NavLink
-                            to="/activity"
-                            onClick={() => btn_icon(!showmenu)}
-                          >
-                              Activity
-                          </NavLink>
-                        </div>
+                  <div className="navbar-item">
+                    <div ref={ref}>
+                      <div
+                        className="dropdown-custom dropdown-toggle btn"
+                        onMouseEnter={handleBtnClick}
+                        onMouseLeave={closeMenu}
+                      >
+                        Stats
+                        <span className="lines"></span>
+                        {openMenu && (
+                          <div className="item-dropdown">
+                            <div className="dropdown" onClick={closeMenu}>
+                              <NavLink
+                                to="/ranking"
+                                onClick={() => btn_icon(!showmenu)}
+                              >
+                                Rankings
+                              </NavLink>
+                              <NavLink
+                                to="/activity"
+                                onClick={() => btn_icon(!showmenu)}
+                              >
+                                Activity
+                              </NavLink>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>

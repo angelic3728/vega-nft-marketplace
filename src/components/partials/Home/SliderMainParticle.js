@@ -31,7 +31,7 @@ const Slidermainparticle= () => (
     <div className="row align-items-center">
           <div className="col-md-6">
               <div className="spacer-single"></div>
-              <h6> <span className="text-uppercase color">Gigaland Market</span></h6>
+              <h6> <span className="text-uppercase color">VEGA NFT MARKETPLACE</span></h6>
               <Reveal className='onStep' keyframes={fadeInUp} delay={300} duration={900} triggerOnce>
               <h1 className="col-white">Create, sell or collect digital items.</h1>
               </Reveal>

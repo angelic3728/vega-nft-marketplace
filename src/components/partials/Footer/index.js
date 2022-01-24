@@ -4,7 +4,7 @@ import { Link } from '@reach/router';
 const Footer= () => (
   <footer className="footer-light">
             <div className="container">
-                <div className="row">
+                <div className="row" style={{position:"relative"}}> 
                     <div className="col-md-3 col-sm-6 col-xs-1">
                         <div className="widget">
                             <h5>Marketplace</h5>
@@ -73,7 +73,7 @@ const Footer= () => (
                                         <img alt="" className="f-logo d-1" src="./img/logo.png" />
                                         <img alt="" className="f-logo d-3" src="./img/logo-2-light.png" />
                                         <img alt="" className="f-logo d-4" src="./img/logo-3.png" />
-                                        <span className="copy">&copy; Copyright 2021 - Gigaland by Designesia</span>
+                                        <span className="copy">&copy; Copyright 2022 - VegaNFT</span>
                                     </span>
                                 </div>
                                 <div className="de-flex-col">

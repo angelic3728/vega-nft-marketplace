@@ -27,15 +27,6 @@ export const StyledHeader = createGlobalStyle`
         header#myHeader .dropdown-toggle::after{
             color: #fff;
         }
-        header#myHeader .logo .d-block{
-            display: none !important;
-        }
-        header#myHeader .logo .d-none{
-            display: none !important;
-        }
-        header#myHeader .logo .d-4{
-            display: block !important;
-        }
         .navbar .search #quick_search{
             border-radius: 20px;
         }

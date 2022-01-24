@@ -55,12 +55,12 @@ $color_more: #403f83;
 }
 
 /*font*/
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 /*general*/
 html {scroll-behavior: auto;}
 body {
-  font-family: "DM Sans", Helvetica, Arial, sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 300;
   font-size: 16px;
   color: $general;
@@ -629,7 +629,7 @@ h4.title {
 }
 h5.s2 {
     letter-spacing: 1px;
-    font-size: 14px;
+    font-size: 16px;
 }
 h5 {
     font-size: 18px;
@@ -641,7 +641,7 @@ h4.s1 {
     font-weight: 500;
 }
 p.lead {
-    font-size: 18px;
+    font-size: 24px;
     line-height: 1.7em;
     margin-top: 0;
     font-weight: 400;
@@ -655,10 +655,10 @@ p.lead {
     border-radius: 6px;
     letter-spacing: normal;
     outline: 0;
-    font-weight: 800;
+    font-weight: 600;
     text-decoration: none;
     padding: 8px 40px;
-    font-size: 14px;
+    font-size: 16px;
     border: none;
     cursor: pointer;
     box-shadow: 2px 2px 20px 0px rgba(131, 100, 226, 0);
@@ -682,13 +682,13 @@ a{
 }
 /* dropdown */
   .dropdown-custom.btn{
-    font-size: 14px;
+    font-size: 16px;
     border: 0px;
     position: relative;
     top: -1px;
     overflow: unset !important;
     letter-spacing: normal;
-    font-weight: 800;
+    font-weight: 600;
     padding: 0 20px 0 0;
     background: none !important;
     &::before {
@@ -803,8 +803,8 @@ a{
     }
     a{
       position: relative;
-      font-size: 14px;
-      font-weight: 800;
+      font-size: 16px;
+      font-weight: 600;
       padding: 0 5px 0 0;
       text-decoration: none !important;
       color: $white;
@@ -1214,7 +1214,7 @@ a{
 }
 .slider-content section span strong {
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   display: block;
 }
 @media (max-height: 500px) {
@@ -2057,7 +2057,7 @@ address {
     -webkit-border-radius: 3px;
 }
 .pagination li .a {
-    font-size: 14px;
+    font-size: 16px;
     color: #888;
     border: solid 1px #dddddd;
     border-right: none;
@@ -2589,7 +2589,7 @@ i.font60 {
 }
 
 .nft_coll span {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .nft_coll p {
@@ -2724,12 +2724,12 @@ i.font60 {
   margin-bottom: -22px;
 }
 .nft__item h4 {
-    font-weight: 800;
+    font-weight: 600;
     font-size: 15px;
     margin-bottom: 5px;
 }
 .nft__item_price {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     display: block;
 }
@@ -2739,7 +2739,7 @@ i.font60 {
     font-weight: 700;
 }
 .nft__item_action {
-    font-size: 14px;
+    font-size: 16px;
     span{
       font-weight: bold;
       color: $color;
@@ -2748,7 +2748,7 @@ i.font60 {
 .nft__item_like {
     position: relative;
     bottom: 22px;
-    font-size: 14px;
+    font-size: 16px;
     color: #ddd;
     float: right;
     span {
@@ -2898,7 +2898,7 @@ i.font60 {
     .bot{
         color: $gray;
         display: block;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 400;
         line-height: 1.2em;
     }
@@ -2932,7 +2932,7 @@ i.font60 {
     display: block;
     color: #606060;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
     margin-top: 5px;
     line-height: 1.4em;
 }
@@ -3094,7 +3094,7 @@ i.font60 {
 /*** filter ***/
 .items_filter {
     width: 100%;
-    font-size: 14px;
+    font-size: 16px;
     margin-bottom: 30px;
     margin-top: -14px;
     .dropdownSelect{
@@ -3334,7 +3334,7 @@ i.font60 {
           margin-right: 10px;
           font-weight: 400;
           padding: 2px 10px;
-          font-size: 14px;
+          font-size: 16px;
           text-align: center;
           min-width: 80px;
           background: rgba(131,100,226, .1);
@@ -3395,7 +3395,7 @@ i.font60 {
     padding-left: 70px;
     span {
       display: block;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 400;
       line-height: 1.2em;
     }
@@ -3730,7 +3730,7 @@ img.img-rounded{
         color: rgba(0,0,0,.6);
         background: none;
         border: solid 2px rgba(0, 0, 0, .1);
-        font-size: 14px;
+        font-size: 16px;
         line-height: 20px;
         text-align: center;
         display: table-cell;
@@ -3763,7 +3763,7 @@ img.img-rounded{
     }
   }
   .p-info {
-    font-size: 14px;
+    font-size: 16px;
     margin: 0;
     padding: 0 0 10px 0;
   }
@@ -4133,7 +4133,7 @@ img.img-rounded{
     margin-bottom: 8px;
     h5{
       color: $color;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 500;
       margin-bottom: 5px;
     }
@@ -4262,7 +4262,7 @@ blockquote {
 }
 
 .blog-list .date-box .month {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .blog-list .date-box .day {
@@ -4334,7 +4334,7 @@ blockquote {
 
 #blog-comment li {
     min-height: 70px;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6em;
 }
 
@@ -4759,10 +4759,10 @@ blockquote {
     border-radius: 6px;
     letter-spacing: normal;
     outline: 0;
-    font-weight: 800;
+    font-weight: 600;
     text-decoration: none;
     padding: 6px 20px;
-    font-size: 14px;
+    font-size: 16px;
     border: none;
     cursor: pointer;
     box-shadow: 2px 2px 20px 0px rgba(131,100,226, 0);
@@ -4861,7 +4861,7 @@ blockquote {
               }
               .d-time {
                 display: block;
-                font-size: 14px;
+                font-size: 16px;
                 color: #727272;
               }
             }
@@ -4911,7 +4911,7 @@ blockquote {
         }
       }
       .d-balance {
-        font-size: 14px;
+        font-size: 16px;
         margin-bottom: 15px;
         h4 {
             font-weight: bold;
@@ -4924,7 +4924,7 @@ blockquote {
         }
       }
       .d-wallet {
-        font-size: 14px;
+        font-size: 16px;
         margin-bottom: 15px;
         h4 {
             font-weight: bold;
@@ -4960,7 +4960,7 @@ blockquote {
             background: none;
             padding: 0;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
             display: block;
             text-align: left;
             &:hover{
