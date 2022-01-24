@@ -43,7 +43,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "rimraf ./build && rimraf ./node_modules && yarn && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -67,5 +67,8 @@
   },
   "devDependencies": {
     "msw": "^0.35.0"
+  },
+  "resolutions": {
+    "react-error-overlay": "6.0.9"
   }
 }
