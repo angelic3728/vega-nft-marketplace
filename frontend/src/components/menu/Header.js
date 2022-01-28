@@ -6,6 +6,23 @@ import Breakpoint, {
 //import { header } from 'react-bootstrap';
 import { Link } from "@reach/router";
 import useOnclickOutside from "react-cool-onclickoutside";
+import {
+  Button,
+  Image,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
+  useDisclosure,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
+import Web3 from "web3";
+
+let web3 = undefined; // Will hold the web3 instance
 
 setDefaultBreakpoints([{ xs: 0 }, { l: 1199 }, { xl: 1200 }]);
 
@@ -24,7 +41,13 @@ const NavLink = (props) => (
 
 const Header = function ({ className }) {
   const [openMenu, setOpenMenu] = React.useState(false);
-  const handleBtnClick = () => {
+  const [loading, setLoading] = useState(false); // Loading button state
+  const [accessToken, setAccessToken] = useState('');
+
+  const toast = useToast();
+
+  // UI operation part
+  const handleMenuOpen = () => {
     setOpenMenu(!openMenu);
   };
   const closeMenu = () => {
@@ -34,6 +57,9 @@ const Header = function ({ className }) {
   const ref = useOnclickOutside(() => {
     closeMenu();
   });
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isOpen2, onOpen: onOpen2, onClose: onClose2 } = useDisclosure();
 
   const [showmenu, btn_icon] = useState(false);
   const [showpop, btn_icon_pop] = useState(false);
@@ -50,6 +76,110 @@ const Header = function ({ className }) {
   const refpopnot = useOnclickOutside(() => {
     closeNot();
   });
+
+  // Authentication part
+  const handleAuthenticate = (publicAddress, signature) =>
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/vega/ethsign`, {
+      body: JSON.stringify({ publicAddress, signature }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    }).then((response) => response.json());
+
+  const handleSignMessage = async (public_address, nonce) => {
+    try {
+      const signature = await web3.eth.personal.sign(
+        `I am signing into vega NFT marketplace with my one-time nonce: ${nonce}`,
+        public_address,
+        "" // MetaMask will ignore the password argument here
+      );
+      onClose();
+      return { public_address, signature };
+    } catch (err) {
+      toast({
+        title: err.message,
+        status: "error",
+        position: "top-right",
+        isClosable: true,
+      });
+      return false;
+    }
+  };
+
+  const handleSignup = (publicAddress) => {
+    return fetch(`${process.env.REACT_APP_BACKEND_URL}/vega/createuser`, {
+      body: JSON.stringify({ public_address: publicAddress }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    }).then((response) => response.json());
+  };
+
+  const connectMetamask = async () => {
+    // Check if MetaMask is installed
+    if (!window.ethereum) {
+      toast({
+        title: "Please install MetaMask first.",
+        status: "info",
+        position: "top-right",
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (!web3) {
+      try {
+        // Request account access if needed
+        await window.ethereum.enable();
+
+        // We don't know window.web3 version, so we use our own instance of Web3
+        // with the injected provider given by MetaMask
+        web3 = new Web3(window.ethereum);
+      } catch (error) {
+        toast({
+          title: "You need to allow MetaMask.",
+          status: "info",
+          position: "top-right",
+          isClosable: true,
+        });
+        return;
+      }
+    }
+    const coinbase = await web3.eth.getCoinbase();
+    if (!coinbase) {
+      toast({
+        title: "Please activate MetaMask first.",
+        status: "info",
+        position: "top-right",
+        isClosable: true,
+      });
+      return;
+    }
+
+    const publicAddress = coinbase.toLowerCase();
+    setLoading(true);
+
+    // Look if user with current publicAddress is already present on backend
+    var user_obj = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/vega/singleuser?publicAddress=${publicAddress}`
+    ).then((response) => response.json());
+    
+    let current_user =
+      user_obj.user.length && user_obj.user.length != 0
+        ? {'public_address':user_obj.user[0].public_address, 'nonce':user_obj.user[0].nonce}
+        : await handleSignup(publicAddress);
+    // Popup MetaMask confirmation modal to sign message
+    debugger;
+    let signature_obj = await handleSignMessage(current_user.public_address, current_user.nonce);
+    if(signature_obj) {
+      let tokenResult = await handleAuthenticate(signature_obj.public_address, signature_obj.signature);
+      
+      setAccessToken(tokenResult.access_token);
+      onOpen2();
+    }
+  };
 
   useEffect(() => {
     const header = document.getElementById("myHeader");
@@ -79,11 +209,7 @@ const Header = function ({ className }) {
           <div className="logo px-0">
             <div className="navbar-title navbar-item">
               <NavLink to="/">
-                <img
-                  src="/img/logos/logo-red.png"
-                  height="55px"
-                  alt="#"
-                />
+                <Image src="/img/logos/logo-red.png" boxSize="55px" alt="#" />
               </NavLink>
             </div>
           </div>
@@ -118,7 +244,7 @@ const Header = function ({ className }) {
                     <div ref={ref}>
                       <div
                         className="dropdown-custom dropdown-toggle btn"
-                        onMouseEnter={handleBtnClick}
+                        onMouseEnter={handleMenuOpen}
                         onMouseLeave={closeMenu}
                       >
                         Stats
@@ -167,7 +293,7 @@ const Header = function ({ className }) {
                     <div ref={ref}>
                       <div
                         className="dropdown-custom dropdown-toggle btn"
-                        onMouseEnter={handleBtnClick}
+                        onMouseEnter={handleMenuOpen}
                         onMouseLeave={closeMenu}
                       >
                         Stats
@@ -200,10 +326,11 @@ const Header = function ({ className }) {
 
           <div className="mainside">
             <div className="connect-wal">
-              <NavLink to="/wallet">Connect Wallet</NavLink>
+              <Button colorScheme="red" onClick={onOpen}>
+                Connect Wallet
+              </Button>
             </div>
             <div className="logout">
-              <NavLink to="/createOptions">Create</NavLink>
               <div
                 id="de-click-menu-notification"
                 className="de-menu-notification"
@@ -363,6 +490,56 @@ const Header = function ({ className }) {
           <div className="menu-line2 white"></div>
         </button>
       </div>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent py="2">
+          <ModalHeader>Connect Your Wallet</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody textAlign="center">
+            <Text>
+              Connect with one of available wallet providers or create a new
+              wallet.
+            </Text>
+            <Button
+              colorScheme="pink"
+              my="3"
+              leftIcon={<Image src="/img/wallet/1.png" boxSize="20px"></Image>}
+              onClick={connectMetamask}
+            >
+              Connect to Metamask
+            </Button>
+            <Text>
+              We do not own private keys and cannot access your funds without
+              your confirmation
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal isOpen={isOpen2} onClose={onClose2}>
+        <ModalOverlay />
+        <ModalContent py="2">
+          <ModalHeader>Congratulations</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody textAlign="center">
+          <Text fontSize='lg'  mb="3" fontWeight="bold">
+              This is the accessToken generated using jwt.
+            </Text>
+            <Text>
+              {accessToken}
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" variant="outline" onClick={onClose2}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </header>
   );
 };

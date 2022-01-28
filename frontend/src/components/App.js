@@ -18,6 +18,7 @@ import Create from './pages/Create';
 import Activity from './pages/Activity';
 import Contact from './pages/Contact';
 import Minter from './pages/Minter';
+import WalletPage from './pages/Wallet';
 
 import { createGlobalStyle } from "styled-components";
 
@@ -68,6 +69,7 @@ const App = () => (
         <Activity path="/activity" />
         <Contact path="/contact" />
         <Minter path="/mint" />
+        <WalletPage path="/wallet" />
       </ScrollTop>
     </PosedRouter>
     <ScrollToTopBtn />
