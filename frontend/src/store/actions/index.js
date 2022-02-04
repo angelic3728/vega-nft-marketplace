@@ -3,6 +3,24 @@ import {
     createAsyncAction as asyncAction 
 } from 'typesafe-actions';
 
+export const getAccessToken = asyncAction(
+    'auth/GET_ACCESS_TOKEN',
+    'auth/GET_ACCESS_TOKEN_SUCCESS',
+    'auth/GET_ACCESS_TOKEN_FAIL',
+)();
+
+export const getAuthInfo = asyncAction(
+    'auth/GET_AUTH_INFO',
+    'auth/GET_AUTH_INFO_SUCCESS',
+    'auth/GET_AUTH_INFO_FAIL',
+)();
+
+export const setAuthStatus = asyncAction(
+    'auth/SET_AUTH',
+    'auth/SET_AUTH_SUCCESS',
+    'auth/SET_AUTH_FAIL',
+)();
+
 export const getNftBreakdown = asyncAction(
     'nft/GET_NFT_BREAKDOWN',
     'nft/GET_NFT_BREAKDOWN_SUCCESS',

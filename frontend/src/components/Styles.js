@@ -161,10 +161,6 @@ export const StyledHeader = createGlobalStyle`
         #scroll-to-top div {
         background: #ff343f;
         }
-        .mainside{
-        .connect-wal{
-        display: none;
-        }
         .logout{
         display: flex;
         align-items: center;

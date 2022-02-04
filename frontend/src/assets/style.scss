@@ -3727,7 +3727,7 @@ img.img-rounded{
       margin: 0 10px 0 0;
       span{
         padding: 35px 10px;
-        color: rgba(0,0,0,.6);
+        color: gray;
         background: none;
         border: solid 2px rgba(0, 0, 0, .1);
         font-size: 16px;
@@ -4776,7 +4776,7 @@ blockquote {
     display: block;
   }
   .logout{
-    display: none;
+    display: flex;
     a{
       display: inline-block;
       margin: 0 5px;

@@ -1,5 +1,9 @@
 import { createSelector, createStructuredSelector } from "reselect";
 
+// Store authentications
+export const accessTokenState = (state) => state.auth.accessToken;
+export const authInfoState = (state) => state.auth.authInfo;
+export const authStatusState = (state) => state.auth.authStatus;
 
 //Store Selectors
 export const nftBreakdownState = (state) => state.NFT.nftBreakdown;

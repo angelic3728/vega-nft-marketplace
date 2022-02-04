@@ -1,4 +1,8 @@
+import Cookies from "universal-cookie";
 import React, { useEffect, useState } from "react";
+import { navigate } from "@reach/router";
+import { useSelector, useDispatch } from "react-redux";
+import * as actions from "../../store/actions";
 import Breakpoint, {
   BreakpointProvider,
   setDefaultBreakpoints,
@@ -20,9 +24,12 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
+import * as selectors from "../../store/selectors";
+import { fetchAccessToken } from "../../store/actions/thunks";
+import { fetchAuthInfo } from "../../store/actions/thunks";
 import Web3 from "web3";
 
-let web3 = undefined; // Will hold the web3 instance
+let web3; // Will hold the web3 instance
 
 setDefaultBreakpoints([{ xs: 0 }, { l: 1199 }, { xl: 1200 }]);
 
@@ -39,12 +46,15 @@ const NavLink = (props) => (
   />
 );
 
-const Header = function ({ className }) {
-  const [openMenu, setOpenMenu] = React.useState(false);
-  const [loading, setLoading] = useState(false); // Loading button state
-  const [accessToken, setAccessToken] = useState('');
-
+const Header = function (props) {
+  const [openMenu, setOpenMenu] = useState(false);
+  const [clickedCreateBtn, setClickedCreateBtn] = useState(false);
+  const dispatch = useDispatch();
+  const accessTokenState = useSelector(selectors.accessTokenState);
+  const authInfoState = useSelector(selectors.authInfoState);
+  const authStatusState = useSelector(selectors.authStatusState);
   const toast = useToast();
+  const cookies = new Cookies();
 
   // UI operation part
   const handleMenuOpen = () => {
@@ -59,7 +69,6 @@ const Header = function ({ className }) {
   });
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isOpen: isOpen2, onOpen: onOpen2, onClose: onClose2 } = useDisclosure();
 
   const [showmenu, btn_icon] = useState(false);
   const [showpop, btn_icon_pop] = useState(false);
@@ -77,16 +86,12 @@ const Header = function ({ className }) {
     closeNot();
   });
 
+  const accessToken = accessTokenState.data
+    ? accessTokenState.access_token
+    : "";
+  const authInfo = authInfoState.data ? authInfoState.data : {};
+  const authStatus = authStatusState ? authStatusState : false;
   // Authentication part
-  const handleAuthenticate = (publicAddress, signature) =>
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/vega/ethsign`, {
-      body: JSON.stringify({ publicAddress, signature }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    }).then((response) => response.json());
-
   const handleSignMessage = async (public_address, nonce) => {
     try {
       const signature = await web3.eth.personal.sign(
@@ -159,26 +164,61 @@ const Header = function ({ className }) {
     }
 
     const publicAddress = coinbase.toLowerCase();
-    setLoading(true);
-
     // Look if user with current publicAddress is already present on backend
     var user_obj = await fetch(
       `${process.env.REACT_APP_BACKEND_URL}/vega/singleuser?publicAddress=${publicAddress}`
     ).then((response) => response.json());
-    
+
     let current_user =
       user_obj.user.length && user_obj.user.length != 0
-        ? {'public_address':user_obj.user[0].public_address, 'nonce':user_obj.user[0].nonce}
+        ? {
+            public_address: user_obj.user[0].public_address,
+            nonce: user_obj.user[0].nonce,
+          }
         : await handleSignup(publicAddress);
     // Popup MetaMask confirmation modal to sign message
-    debugger;
-    let signature_obj = await handleSignMessage(current_user.public_address, current_user.nonce);
-    if(signature_obj) {
-      let tokenResult = await handleAuthenticate(signature_obj.public_address, signature_obj.signature);
-      
-      setAccessToken(tokenResult.access_token);
-      onOpen2();
+    let signature_obj = await handleSignMessage(
+      current_user.public_address,
+      current_user.nonce
+    );
+    if (signature_obj) {
+      // let tokenResult = await handleAuthenticate(signature_obj.public_address, signature_obj.signature);
+      dispatch(
+        fetchAccessToken(signature_obj.public_address, signature_obj.signature)
+      );
+      toast({
+        title: "Successfully logged in!",
+        status: "info",
+        position: "top-right",
+        isClosable: true,
+      });
+      dispatch(fetchAuthInfo(signature_obj.public_address));
+      if (clickedCreateBtn) navigate(`/create`);
     }
+  };
+
+  const createBtnClicked = () => {
+    btn_icon(!showmenu);
+    setClickedCreateBtn(true);
+    onOpen();
+  };
+
+  const clickConnectWallet = () => {
+    onOpen();
+    setClickedCreateBtn(false);
+  };
+
+  const signOut = () => {
+    dispatch(actions.getAccessToken.failure());
+    dispatch(actions.setAuthStatus.failure());
+    cookies.remove(process.env.REACT_APP_TOKEN_COOKIE_NAME);
+    cookies.remove(process.env.REACT_APP_ADDRESS_COOKIE_NAME);
+    toast({
+      title: "Successfully logged out!",
+      status: "info",
+      position: "top-right",
+      isClosable: true,
+    });
   };
 
   useEffect(() => {
@@ -198,12 +238,29 @@ const Header = function ({ className }) {
         closeMenu();
       }
     });
+    const accessToken = cookies.get(process.env.REACT_APP_TOKEN_COOKIE_NAME);
+    dispatch(actions.getAccessToken.success(accessToken));
+    if (accessToken) {
+      const publicAddress = cookies.get(
+        process.env.REACT_APP_ADDRESS_COOKIE_NAME
+      );
+      dispatch(fetchAuthInfo(publicAddress));
+    }
+
     return () => {
       window.removeEventListener("scroll", scrollCallBack);
     };
   }, []);
+
+  useEffect(() => {
+    const publicAddress = cookies.get(
+      process.env.REACT_APP_ADDRESS_COOKIE_NAME
+    );
+    dispatch(fetchAuthInfo(publicAddress));
+  }, [accessToken]);
+
   return (
-    <header className={`navbar white ${className}`} id="myHeader">
+    <header className={`navbar white ${props.className}`} id="myHeader">
       <div className="container">
         <div className="row w-100-nav">
           <div className="logo px-0">
@@ -235,7 +292,10 @@ const Header = function ({ className }) {
                     </NavLink>
                   </div>
                   <div className="navbar-item">
-                    <NavLink to="/create" onClick={() => btn_icon(!showmenu)}>
+                    <NavLink
+                      to={authStatus ? "/create" : "./"}
+                      onClick={authStatus ? null : createBtnClicked}
+                    >
                       Create
                       <span className="lines"></span>
                     </NavLink>
@@ -284,7 +344,10 @@ const Header = function ({ className }) {
                     </NavLink>
                   </div>
                   <div className="navbar-item">
-                    <NavLink to="/create" onClick={() => btn_icon(!showmenu)}>
+                    <NavLink
+                      to={authStatus ? "/create" : "./"}
+                      onClick={authStatus ? null : createBtnClicked}
+                    >
                       Create
                       <span className="lines"></span>
                     </NavLink>
@@ -325,162 +388,166 @@ const Header = function ({ className }) {
           </BreakpointProvider>
 
           <div className="mainside">
-            <div className="connect-wal">
-              <Button colorScheme="red" onClick={onOpen}>
-                Connect Wallet
-              </Button>
-            </div>
-            <div className="logout">
-              <div
-                id="de-click-menu-notification"
-                className="de-menu-notification"
-                onClick={() => btn_icon_not(!shownot)}
-                ref={refpopnot}
-              >
-                <div className="d-count">8</div>
-                <i className="fa fa-bell"></i>
-                {shownot && (
-                  <div className="popshow">
-                    <div className="de-flex">
-                      <h4>Notifications</h4>
-                      <span className="viewaall">Show all</span>
-                    </div>
-                    <ul>
-                      <li>
-                        <div className="mainnot">
-                          <img
-                            className="lazy"
-                            src="../../img/author/author-2.jpg"
-                            alt=""
-                          />
-                          <div className="d-desc">
-                            <span className="d-name">
-                              <b>Mamie Barnett</b> started following you
-                            </span>
-                            <span className="d-time">1 hour ago</span>
-                          </div>
-                        </div>
-                      </li>
-                      <li>
-                        <div className="mainnot">
-                          <img
-                            className="lazy"
-                            src="../../img/author/author-3.jpg"
-                            alt=""
-                          />
-                          <div className="d-desc">
-                            <span className="d-name">
-                              <b>Nicholas Daniels</b> liked your item
-                            </span>
-                            <span className="d-time">2 hours ago</span>
-                          </div>
-                        </div>
-                      </li>
-                      <li>
-                        <div className="mainnot">
-                          <img
-                            className="lazy"
-                            src="../../img/author/author-4.jpg"
-                            alt=""
-                          />
-                          <div className="d-desc">
-                            <span className="d-name">
-                              <b>Lori Hart</b> started following you
-                            </span>
-                            <span className="d-time">18 hours ago</span>
-                          </div>
-                        </div>
-                      </li>
-                      <li>
-                        <div className="mainnot">
-                          <img
-                            className="lazy"
-                            src="../../img/author/author-5.jpg"
-                            alt=""
-                          />
-                          <div className="d-desc">
-                            <span className="d-name">
-                              <b>Jimmy Wright</b> liked your item
-                            </span>
-                            <span className="d-time">1 day ago</span>
-                          </div>
-                        </div>
-                      </li>
-                      <li>
-                        <div className="mainnot">
-                          <img
-                            className="lazy"
-                            src="../../img/author/author-6.jpg"
-                            alt=""
-                          />
-                          <div className="d-desc">
-                            <span className="d-name">
-                              <b>Karla Sharp</b> started following you
-                            </span>
-                            <span className="d-time">3 days ago</span>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                )}
+            {!authStatus && (
+              <div className="connect-wal">
+                <Button colorScheme="red" onClick={clickConnectWallet}>
+                  Connect Wallet
+                </Button>
               </div>
-              <div
-                id="de-click-menu-profile"
-                className="de-menu-profile"
-                onClick={() => btn_icon_pop(!showpop)}
-                ref={refpop}
-              >
-                <img
-                  src="../../img/author_single/author_thumbnail.jpg"
-                  alt=""
-                />
-                {showpop && (
-                  <div className="popshow">
-                    <div className="d-name">
-                      <h4>Monica Lucas</h4>
-                      <span
-                        className="name"
-                        onClick={() => window.open("", "_self")}
-                      >
-                        Set display name
-                      </span>
+            )}
+            {authStatus && (
+              <div className="logout">
+                <div
+                  id="de-click-menu-notification"
+                  className="de-menu-notification"
+                  onClick={() => btn_icon_not(!shownot)}
+                  ref={refpopnot}
+                >
+                  <div className="d-count">8</div>
+                  <i className="fa fa-bell"></i>
+                  {shownot && (
+                    <div className="popshow">
+                      <div className="de-flex">
+                        <h4>Notifications</h4>
+                        <span className="viewaall">Show all</span>
+                      </div>
+                      <ul>
+                        <li>
+                          <div className="mainnot">
+                            <img
+                              className="lazy"
+                              src="../../img/author/author-2.jpg"
+                              alt=""
+                            />
+                            <div className="d-desc">
+                              <span className="d-name">
+                                <b>Mamie Barnett</b> started following you
+                              </span>
+                              <span className="d-time">1 hour ago</span>
+                            </div>
+                          </div>
+                        </li>
+                        <li>
+                          <div className="mainnot">
+                            <img
+                              className="lazy"
+                              src="../../img/author/author-3.jpg"
+                              alt=""
+                            />
+                            <div className="d-desc">
+                              <span className="d-name">
+                                <b>Nicholas Daniels</b> liked your item
+                              </span>
+                              <span className="d-time">2 hours ago</span>
+                            </div>
+                          </div>
+                        </li>
+                        <li>
+                          <div className="mainnot">
+                            <img
+                              className="lazy"
+                              src="../../img/author/author-4.jpg"
+                              alt=""
+                            />
+                            <div className="d-desc">
+                              <span className="d-name">
+                                <b>Lori Hart</b> started following you
+                              </span>
+                              <span className="d-time">18 hours ago</span>
+                            </div>
+                          </div>
+                        </li>
+                        <li>
+                          <div className="mainnot">
+                            <img
+                              className="lazy"
+                              src="../../img/author/author-5.jpg"
+                              alt=""
+                            />
+                            <div className="d-desc">
+                              <span className="d-name">
+                                <b>Jimmy Wright</b> liked your item
+                              </span>
+                              <span className="d-time">1 day ago</span>
+                            </div>
+                          </div>
+                        </li>
+                        <li>
+                          <div className="mainnot">
+                            <img
+                              className="lazy"
+                              src="../../img/author/author-6.jpg"
+                              alt=""
+                            />
+                            <div className="d-desc">
+                              <span className="d-name">
+                                <b>Karla Sharp</b> started following you
+                              </span>
+                              <span className="d-time">3 days ago</span>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
                     </div>
-                    <div className="d-balance">
-                      <h4>Balance</h4>
-                      12.858 ETH
+                  )}
+                </div>
+                <div
+                  id="de-click-menu-profile"
+                  className="de-menu-profile"
+                  onClick={() => btn_icon_pop(!showpop)}
+                  ref={refpop}
+                >
+                  <img
+                    src="../../img/author_single/author_thumbnail.jpg"
+                    alt=""
+                  />
+                  {showpop && (
+                    <div className="popshow">
+                      <div className="d-name">
+                        <h4>Monica Lucas</h4>
+                        <span
+                          className="name"
+                          onClick={() => window.open("", "_self")}
+                        >
+                          Set display name
+                        </span>
+                      </div>
+                      <div className="d-balance">
+                        <h4>Balance</h4>
+                        12.858 ETH
+                      </div>
+                      <div className="d-wallet">
+                        <h4>My Wallet</h4>
+                        <span id="wallet" className="d-wallet-address">
+                          {authInfo.public_address}
+                        </span>
+                        <button id="btn_copy" title="Copy Text">
+                          Copy
+                        </button>
+                      </div>
+                      <div className="d-line"></div>
+                      <ul className="de-submenu-profile">
+                        <li>
+                          <span>
+                            <i className="fa fa-user"></i> My profile
+                          </span>
+                        </li>
+                        <li>
+                          <span>
+                            <i className="fa fa-pencil"></i> Edit profile
+                          </span>
+                        </li>
+                        <li>
+                          <span onClick={signOut}>
+                            <i className="fa fa-sign-out"></i> Sign out
+                          </span>
+                        </li>
+                      </ul>
                     </div>
-                    <div className="d-wallet">
-                      <h4>My Wallet</h4>
-                      <span id="wallet" className="d-wallet-address">
-                        DdzFFzCqrhshMSxb9oW3mRo4MJrQkusV3fGFSTwaiu4wPBqMryA9DYVJCkW9n7twCffG5f5wX2sSkoDXGiZB1HPa7K7f865Kk4LqnrME
-                      </span>
-                      <button id="btn_copy" title="Copy Text">
-                        Copy
-                      </button>
-                    </div>
-                    <div className="d-line"></div>
-                    <ul className="de-submenu-profile">
-                      <li>
-                        <span>
-                          <i className="fa fa-user"></i> My profile
-                        </span>
-                      </li>
-                      <li>
-                        <span>
-                          <i className="fa fa-pencil"></i> Edit profile
-                        </span>
-                      </li>
-                      <li>
-                        <span>
-                          <i className="fa fa-sign-out"></i> Sign out
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -515,26 +582,6 @@ const Header = function ({ className }) {
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="blue" variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Modal isOpen={isOpen2} onClose={onClose2}>
-        <ModalOverlay />
-        <ModalContent py="2">
-          <ModalHeader>Congratulations</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody textAlign="center">
-          <Text fontSize='lg'  mb="3" fontWeight="bold">
-              This is the accessToken generated using jwt.
-            </Text>
-            <Text>
-              {accessToken}
-            </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" variant="outline" onClick={onClose2}>
               Close
             </Button>
           </ModalFooter>
