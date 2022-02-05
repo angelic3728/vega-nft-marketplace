@@ -36,13 +36,14 @@ const Create = () => {
   const [mintFile, setMintFile] = useState(null);
   const [minBids, setMinBids] = useState("");
   const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [expireDate, setExpireDate] = useState("");
   const [unlockContent, setUnlockContent] = useState("");
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   const handleShow = () => {
+    setCreateMethod(1);
     document.getElementById("tab_opt_1").classList.add("show");
     document.getElementById("tab_opt_1").classList.remove("hide");
     document.getElementById("tab_opt_2").classList.remove("show");
@@ -51,6 +52,7 @@ const Create = () => {
     document.getElementById("btn3").classList.remove("active");
   };
   const handleShow1 = () => {
+    setCreateMethod(2);
     document.getElementById("tab_opt_1").classList.add("hide");
     document.getElementById("tab_opt_1").classList.remove("show");
     document.getElementById("tab_opt_2").classList.add("show");
@@ -59,6 +61,7 @@ const Create = () => {
     document.getElementById("btn3").classList.remove("active");
   };
   const handleShow2 = () => {
+    setCreateMethod(3);
     document.getElementById("tab_opt_1").classList.add("show");
     document.getElementById("btn1").classList.remove("active");
     document.getElementById("btn2").classList.remove("active");
@@ -171,6 +174,7 @@ const Create = () => {
                       id="item_price"
                       className="form-control"
                       placeholder="enter price for one item (ETH)"
+                      onChange={(e) => setPrice(e.target.value)}
                     />
                   </div>
 
@@ -182,6 +186,7 @@ const Create = () => {
                       id="item_price_bid"
                       className="form-control"
                       placeholder="enter minimum bid"
+                      onChange={(e) => setMinBids(e.target.value)}
                     />
 
                     <div className="spacer-20"></div>
@@ -195,6 +200,7 @@ const Create = () => {
                           id="bid_starting_date"
                           className="form-control"
                           min="1997-01-01"
+                          onChange={(e) => setStartDate(e.target.value)}
                         />
                       </div>
                       <div className="col-md-6">
@@ -204,6 +210,7 @@ const Create = () => {
                           name="bid_expiration_date"
                           id="bid_expiration_date"
                           className="form-control"
+                          onChange={(e) => setExpireDate(e.target.value)}
                         />
                       </div>
                     </div>
@@ -245,7 +252,7 @@ const Create = () => {
                   )}
                 </div>
                 <div className="clearfix"></div>
-                <p className="p-info pb-3">
+                <p className="p-info pb-3" style={{ color: "gray" }}>
                   Unlock content after successful transaction.
                 </p>
 
@@ -257,6 +264,7 @@ const Create = () => {
                       id="item_unlock"
                       className="form-control"
                       placeholder="Access key, code to redeem or link to a file..."
+                      onChange={(e) => setUnlockContent(e.target.value)}
                     />
                   </div>
                 ) : null}
@@ -269,6 +277,7 @@ const Create = () => {
                 id="item_title"
                 className="form-control"
                 placeholder="e.g. 'Crypto Funk"
+                onChange={(e) => setTitle(e.target.value)}
               />
 
               <div className="spacer-10"></div>
@@ -280,18 +289,8 @@ const Create = () => {
                 id="item_desc"
                 className="form-control"
                 placeholder="e.g. 'This is very limited item'"
+                onChange={(e) => setDescription(e.target.value)}
               ></textarea>
-
-              <div className="spacer-10"></div>
-
-              <h5>Price</h5>
-              <input
-                type="text"
-                name="item_price"
-                id="item_price"
-                className="form-control"
-                placeholder="enter price for one item (ETH)"
-              />
 
               <div className="spacer-10"></div>
 
@@ -302,6 +301,7 @@ const Create = () => {
                 id="item_royalties"
                 className="form-control"
                 placeholder="suggested: 0, 10%, 20%, 30%. Maximum is 70%"
+                onChange={(e) => setRoyaltie(e.target.value)}
               />
 
               <div className="spacer-10"></div>
@@ -318,9 +318,11 @@ const Create = () => {
           <div className="col-lg-3 col-sm-6 col-xs-12">
             <h5>Preview item</h5>
             <div className="nft__item m-0">
-              <div className="de_countdown">
-                <Clock deadline="December, 30, 2021" />
-              </div>
+              {(createMethod === 2 || createMethod === 3) && (
+                <div className="de_countdown">
+                  <Clock deadline="December, 30, 2022" />
+                </div>
+              )}
               <div className="author_list_pp">
                 <span>
                   <img
@@ -345,10 +347,14 @@ const Create = () => {
                 <span>
                   <h4>NFT Title</h4>
                 </span>
-                <div className="nft__item_price">0.00 ETH</div>
-                <div className="nft__item_action">
-                  <span>Place a bid</span>
-                </div>
+                {(createMethod === 2 || createMethod === 3) && (
+                  <div className="nft__item_price">{price} ETH</div>
+                )}
+                {(createMethod === 2 || createMethod === 3) && (
+                  <div className="nft__item_action">
+                    <span>Place a bid</span>
+                  </div>
+                )}
                 <div className="nft__item_like">
                   <i className="fa fa-heart"></i>
                   <span>50</span>

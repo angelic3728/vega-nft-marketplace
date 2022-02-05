@@ -1,9 +1,9 @@
 import { pinJSONToIPFS, pinFileToIPFS } from "./pinata.js";
 require("dotenv").config();
-const alchemyKey = process.env.REACT_APP_ALCHEMY_KEY;
+const infuraRPCUrl = process.env.REACT_APP_INFURA_KEY;
 const contractABI = require("./contract-abi.json");
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
-const web3 = createAlchemyWeb3(alchemyKey);
+const web3 = createAlchemyWeb3(infuraRPCUrl);
 
 export const connectWallet = async () => {
   if (window.ethereum) {
@@ -23,25 +23,13 @@ export const connectWallet = async () => {
       };
     }
   } else {
-    return {
-      address: "",
-      status: (
-        <span>
-          <p>
-            {" "}
-            🦊{" "}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href={`https://metamask.io/download.html`}
-            >
-              You must install Metamask, a virtual Ethereum wallet, in your
-              browser.
-            </a>
-          </p>
-        </span>
-      ),
-    };
+    // toast({
+    //   title: "Please install MetaMask first.",
+    //   status: "info",
+    //   position: "top-right",
+    //   isClosable: true,
+    // });
+    return;
   }
 };
 

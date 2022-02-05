@@ -27,9 +27,9 @@ import {
 import * as selectors from "../../store/selectors";
 import { fetchAccessToken } from "../../store/actions/thunks";
 import { fetchAuthInfo } from "../../store/actions/thunks";
-import Web3 from "web3";
-
-let web3; // Will hold the web3 instance
+const infuraRPCUrl = process.env.REACT_APP_INFURA_KEY;
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
+const web3 = createAlchemyWeb3(infuraRPCUrl);
 
 setDefaultBreakpoints([{ xs: 0 }, { l: 1199 }, { xl: 1200 }]);
 
@@ -133,37 +133,12 @@ const Header = function (props) {
       });
       return;
     }
-
-    if (!web3) {
-      try {
-        // Request account access if needed
-        await window.ethereum.enable();
-
-        // We don't know window.web3 version, so we use our own instance of Web3
-        // with the injected provider given by MetaMask
-        web3 = new Web3(window.ethereum);
-      } catch (error) {
-        toast({
-          title: "You need to allow MetaMask.",
-          status: "info",
-          position: "top-right",
-          isClosable: true,
-        });
-        return;
-      }
-    }
-    const coinbase = await web3.eth.getCoinbase();
-    if (!coinbase) {
-      toast({
-        title: "Please activate MetaMask first.",
-        status: "info",
-        position: "top-right",
-        isClosable: true,
-      });
-      return;
-    }
-
-    const publicAddress = coinbase.toLowerCase();
+    debugger;
+    const addressArray = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+    
+    const publicAddress = addressArray[0].toLowerCase();
     // Look if user with current publicAddress is already present on backend
     var user_obj = await fetch(
       `${process.env.REACT_APP_BACKEND_URL}/vega/singleuser?publicAddress=${publicAddress}`
@@ -256,6 +231,7 @@ const Header = function (props) {
     const publicAddress = cookies.get(
       process.env.REACT_APP_ADDRESS_COOKIE_NAME
     );
+    if(publicAddress !== undefined)
     dispatch(fetchAuthInfo(publicAddress));
   }, [accessToken]);
 
