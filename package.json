@@ -1,0 +1,27 @@
+{
+  "name": "vega-nft-marketplace",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "backend/server.js",
+  "author": "Vladislav Nisivkin",
+  "scripts": {
+    "server": "nodemon backend/server.js",
+    "client": "cd frontend && yarn start",
+    "dev": "concurrently \"yarn run server\" \"yarn run client\""
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^14.3.0",
+    "eth-sig-util": "3.0.0",
+    "ethereumjs-util": "7.0.5",
+    "express": "^4.17.2",
+    "express-validator": "^6.14.0",
+    "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.3.3"
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "nodemon": "^2.0.15"
+  }
+}
