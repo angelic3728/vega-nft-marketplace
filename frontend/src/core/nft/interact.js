@@ -1,6 +1,6 @@
-import { pinJSONToIPFS, pinFileToIPFS } from "./pinata.js";
+import { pinJSONToIPFS, pinFileToIPFS } from "./pinata";
 require("dotenv").config();
-const infuraRPCUrl = process.env.REACT_APP_INFURA_KEY;
+const infuraRPCUrl = process.env.REACT_APP_RPC_URL;
 const contractABI = require("./contract-abi.json");
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(infuraRPCUrl);
@@ -47,7 +47,7 @@ export const getCurrentWalletConnected = async () => {
       } else {
         return {
           address: "",
-          status: "🦊 Connect to Metamask using the top right button.",
+          status: "Connect to Metamask using the top right button.",
         };
       }
     } catch (err) {
@@ -60,26 +60,19 @@ export const getCurrentWalletConnected = async () => {
     return {
       address: "",
       status: (
-        <span>
-          <p>
-            {" "}
-            🦊{" "}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href={`https://metamask.io/download.html`}
-            >
-              You must install Metamask, a virtual Ethereum wallet, in your
-              browser.
-            </a>
-          </p>
-        </span>
+        "You must install Metamask, a virtual Ethereum wallet, in your browser."
       ),
     };
   }
 };
 
-export const mintNFT = async (name, description, file, onClose, successToast) => {
+export const mintNFT = async (
+  name,
+  description,
+  file,
+  onClose,
+  successToast
+) => {
   if (name.trim() === "" || description.trim() === "") {
     return {
       success: false,

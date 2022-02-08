@@ -5,24 +5,19 @@ import "../node_modules/font-awesome/css/font-awesome.min.css";
 import "../node_modules/elegant-icons/style.css";
 import "../node_modules/et-line/style.css";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import "../node_modules/bootstrap/dist/js/bootstrap.js";
+import "bootstrap";
 import "./assets/style.scss";
 import "./assets/style_grey.scss";
 import App from "./components/App";
 import * as serviceWorker from "./serviceWorker";
 
 //redux store
-import { Provider } from "react-redux";
-import { ChakraProvider } from '@chakra-ui/react'
-import vegaTheme from "./vegaTheme"
-import store from "./store";
+import Providers  from "./components/Providers";
 
 ReactDOM.render(
-  <Provider store={store}>
-    <ChakraProvider theme={vegaTheme}>
-      <App />
-    </ChakraProvider>
-  </Provider>,
+  <Providers >
+    <App />
+  </Providers>,
   document.getElementById("root")
 );
 // If you want your app to work offline and load faster, you can change

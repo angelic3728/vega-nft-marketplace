@@ -1,5 +1,5 @@
 import Cookies from "universal-cookie";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { navigate } from "@reach/router";
 import { useSelector, useDispatch } from "react-redux";
 import * as actions from "../../store/actions";
@@ -7,7 +7,7 @@ import Breakpoint, {
   BreakpointProvider,
   setDefaultBreakpoints,
 } from "react-socks";
-//import { header } from 'react-bootstrap';
+import { useWeb3React } from "@web3-react/core";
 import { Link } from "@reach/router";
 import useOnclickOutside from "react-cool-onclickoutside";
 import {
@@ -27,7 +27,8 @@ import {
 import * as selectors from "../../store/selectors";
 import { fetchAccessToken } from "../../store/actions/thunks";
 import { fetchAuthInfo } from "../../store/actions/thunks";
-const infuraRPCUrl = process.env.REACT_APP_INFURA_KEY;
+import ConnectWalletButton from "../../items/ConnectWalletButton";
+const infuraRPCUrl = process.env.REACT_APP_RPC_URL;
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 const web3 = createAlchemyWeb3(infuraRPCUrl);
 
@@ -49,6 +50,7 @@ const NavLink = (props) => (
 const Header = function (props) {
   const [openMenu, setOpenMenu] = useState(false);
   const [clickedCreateBtn, setClickedCreateBtn] = useState(false);
+  const connectWalletBtnRef = useRef(null);
   const dispatch = useDispatch();
   const accessTokenState = useSelector(selectors.accessTokenState);
   const authInfoState = useSelector(selectors.authInfoState);
@@ -67,8 +69,6 @@ const Header = function (props) {
   const ref = useOnclickOutside(() => {
     closeMenu();
   });
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [showmenu, btn_icon] = useState(false);
   const [showpop, btn_icon_pop] = useState(false);
@@ -99,7 +99,6 @@ const Header = function (props) {
         public_address,
         "" // MetaMask will ignore the password argument here
       );
-      onClose();
       return { public_address, signature };
     } catch (err) {
       toast({
@@ -133,11 +132,11 @@ const Header = function (props) {
       });
       return;
     }
-    debugger;
+
     const addressArray = await window.ethereum.request({
       method: "eth_requestAccounts",
     });
-    
+
     const publicAddress = addressArray[0].toLowerCase();
     // Look if user with current publicAddress is already present on backend
     var user_obj = await fetch(
@@ -174,13 +173,8 @@ const Header = function (props) {
 
   const createBtnClicked = () => {
     btn_icon(!showmenu);
-    setClickedCreateBtn(true);
-    onOpen();
-  };
-
-  const clickConnectWallet = () => {
-    onOpen();
-    setClickedCreateBtn(false);
+    debugger;
+    connectWalletBtnRef.current.click();
   };
 
   const signOut = () => {
@@ -231,8 +225,7 @@ const Header = function (props) {
     const publicAddress = cookies.get(
       process.env.REACT_APP_ADDRESS_COOKIE_NAME
     );
-    if(publicAddress !== undefined)
-    dispatch(fetchAuthInfo(publicAddress));
+    if (publicAddress !== undefined) dispatch(fetchAuthInfo(publicAddress));
   }, [accessToken]);
 
   return (
@@ -366,9 +359,7 @@ const Header = function (props) {
           <div className="mainside">
             {!authStatus && (
               <div className="connect-wal">
-                <Button colorScheme="red" onClick={clickConnectWallet}>
-                  Connect Wallet
-                </Button>
+                <ConnectWalletButton />
               </div>
             )}
             {authStatus && (
@@ -526,43 +517,12 @@ const Header = function (props) {
             )}
           </div>
         </div>
-
         <button className="nav-icon" onClick={() => btn_icon(!showmenu)}>
           <div className="menu-line white"></div>
           <div className="menu-line1 white"></div>
           <div className="menu-line2 white"></div>
         </button>
       </div>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent py="2">
-          <ModalHeader>Connect Your Wallet</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody textAlign="center">
-            <Text>
-              Connect with one of available wallet providers or create a new
-              wallet.
-            </Text>
-            <Button
-              colorScheme="pink"
-              my="3"
-              leftIcon={<Image src="/img/wallet/1.png" boxSize="20px"></Image>}
-              onClick={connectMetamask}
-            >
-              Connect to Metamask
-            </Button>
-            <Text>
-              We do not own private keys and cannot access your funds without
-              your confirmation
-            </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </header>
   );
 };
