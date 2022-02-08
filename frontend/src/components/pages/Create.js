@@ -85,7 +85,7 @@ const Create = () => {
   };
 
   useEffect(() => {
-    if(account && tokenId !== "", tokenURI !== "") {
+    if(account && tokenId !== "" && tokenURI !== "") {
       handleConfirm();
     }
   }, [tokenId, tokenURI]);
