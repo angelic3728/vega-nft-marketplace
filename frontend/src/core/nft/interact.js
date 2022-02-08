@@ -1,7 +1,7 @@
 import { pinJSONToIPFS, pinFileToIPFS } from "./pinata.js";
 require("dotenv").config();
 
-export const mintNFT = async (name, description, file) => {
+export const uploadNFT = async (name, description, file) => {
   if (name.trim() === "" || description.trim() === "") {
     return {
       success: false,

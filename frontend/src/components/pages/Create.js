@@ -6,7 +6,7 @@ import { useNftTokenContract } from '../../hooks/useContracts'
 import useApproveConfirmTransaction from '../../hooks/useApproveConfirmTransaction'
 import useToast from '../../hooks/useToast'
 import { useWeb3React } from "@web3-react/core";
-import { mintNFT } from "../../core/nft/interact";
+import { uploadNFT } from "../../core/nft/interact";
 
 // import { createGlobalStyle } from 'styled-components';
 
@@ -61,7 +61,7 @@ const Create = () => {
   };
 
   const createNFT = async () => {
-    const uploadRes =  await mintNFT(title, description, mintFile);
+    const uploadRes =  await uploadNFT(title, description, mintFile);
     if(uploadRes && uploadRes.success) {
       setTokenId(uploadRes.metadata[0]);
       setTokenURI(uploadRes.metadata[1]);
@@ -71,7 +71,6 @@ const Create = () => {
   const performMint = async () => {
 
     const tx = await nftTokenContract.mintWithTokenURI(account, tokenId, tokenURI);
-    debugger;
     const receipt = await tx.wait();
     console.log(receipt);
     toastSuccess("Successfully performed!", receipt.blockHash);
