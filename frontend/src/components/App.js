@@ -17,9 +17,9 @@ import NewsSingle from './pages/NewsSingle';
 import Create from './pages/Create';
 import Activity from './pages/Activity';
 import Contact from './pages/Contact';
-import Minter from './pages/Minter';
 import WalletPage from './pages/Wallet';
 
+import { ToastListener } from '../contexts/ToastsContext'
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyles = createGlobalStyle`
@@ -48,6 +48,7 @@ const PosedRouter = ({ children }) => (
 const App = () => (
   <div className="wraper">
     <GlobalStyles />
+    <ToastListener />
     <Header />
     <PosedRouter>
       <ScrollTop path="/">
@@ -68,7 +69,6 @@ const App = () => (
         <Create path="/create" />
         <Activity path="/activity" />
         <Contact path="/contact" />
-        <Minter path="/mint" />
         <WalletPage path="/wallet" />
       </ScrollTop>
     </PosedRouter>

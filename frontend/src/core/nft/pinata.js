@@ -51,7 +51,6 @@ export const pinFileToIPFS = (file) => {
       },
     })
     .then(function (response) {
-      debugger;
       return {
         success: true,
         pinataFileUrl:

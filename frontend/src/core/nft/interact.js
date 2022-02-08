@@ -1,85 +1,7 @@
 import { pinJSONToIPFS, pinFileToIPFS } from "./pinata.js";
 require("dotenv").config();
-const infuraRPCUrl = process.env.REACT_APP_INFURA_KEY;
-const contractABI = require("./contract-abi.json");
-const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
-const web3 = createAlchemyWeb3(infuraRPCUrl);
 
-export const connectWallet = async () => {
-  if (window.ethereum) {
-    try {
-      const addressArray = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      const obj = {
-        status: "Metamask successfuly connected.",
-        address: addressArray[0],
-      };
-      return obj;
-    } catch (err) {
-      return {
-        address: "",
-        status: "Something went wrong: " + err.message,
-      };
-    }
-  } else {
-    // toast({
-    //   title: "Please install MetaMask first.",
-    //   status: "info",
-    //   position: "top-right",
-    //   isClosable: true,
-    // });
-    return;
-  }
-};
-
-export const getCurrentWalletConnected = async () => {
-  if (window.ethereum) {
-    try {
-      const addressArray = await window.ethereum.request({
-        method: "eth_accounts",
-      });
-      if (addressArray.length > 0) {
-        return {
-          address: addressArray[0],
-          status: "Fill in the text-field above.",
-        };
-      } else {
-        return {
-          address: "",
-          status: "🦊 Connect to Metamask using the top right button.",
-        };
-      }
-    } catch (err) {
-      return {
-        address: "",
-        status: "Something went wrong: " + err.message,
-      };
-    }
-  } else {
-    return {
-      address: "",
-      status: (
-        <span>
-          <p>
-            {" "}
-            🦊{" "}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href={`https://metamask.io/download.html`}
-            >
-              You must install Metamask, a virtual Ethereum wallet, in your
-              browser.
-            </a>
-          </p>
-        </span>
-      ),
-    };
-  }
-};
-
-export const mintNFT = async (name, description, file, onClose, successToast) => {
+export const uploadNFT = async (name, description, file) => {
   if (name.trim() === "" || description.trim() === "") {
     return {
       success: false,
@@ -108,38 +30,43 @@ export const mintNFT = async (name, description, file, onClose, successToast) =>
     }
     const tokenURI = pinataResponse.pinataUrl;
 
-    window.contract = await new web3.eth.Contract(
-      contractABI,
-      process.env.REACT_APP_NFT_TOKEN_ADDRESS
-    );
+    // window.contract = await new web3.eth.Contract(
+    //   contractABI,
+    //   process.env.REACT_APP_NFT_TOKEN_ADDRESS
+    // );
 
-    const transactionParameters = {
-      to: process.env.REACT_APP_NFT_TOKEN_ADDRESS, // Required except during contract publications.
-      from: window.ethereum.selectedAddress, // must match user's active address.
-      data: window.contract.methods
-        .mintWithTokenURI(window.ethereum.selectedAddress, tokenId, tokenURI)
-        .encodeABI(),
+    return {
+      success: true,
+      metadata:[tokenId, tokenURI]
     };
 
-    try {
-      const txHash = await window.ethereum.request({
-        method: "eth_sendTransaction",
-        params: [transactionParameters],
-      });
-      onClose();
-      successToast();
-      return {
-        success: true,
-        status:
-          "Check out your transaction on Etherscan: https://ropsten.etherscan.io/tx/" +
-          txHash,
-      };
-    } catch (error) {
-      onClose();
-      return {
-        success: false,
-        status: "Something went wrong: " + error.message,
-      };
-    }
+    // const transactionParameters = {
+    //   to: process.env.REACT_APP_NFT_TOKEN_ADDRESS, // Required except during contract publications.
+    //   from: window.ethereum.selectedAddress, // must match user's active address.
+    //   data: window.contract.methods
+    //     .mintWithTokenURI(window.ethereum.selectedAddress, tokenId, tokenURI)
+    //     .encodeABI(),
+    // };
+
+    // try {
+    //   const txHash = await window.ethereum.request({
+    //     method: "eth_sendTransaction",
+    //     params: [transactionParameters],
+    //   });
+    //   onClose();
+    //   successToast();
+    //   return {
+    //     success: true,
+    //     status:
+    //       "Check out your transaction on Etherscan: https://ropsten.etherscan.io/tx/" +
+    //       txHash,
+    //   };
+    // } catch (error) {
+    //   onClose();
+    //   return {
+    //     success: false,
+    //     status: "Something went wrong: " + error.message,
+    //   };
+    // }
   }
 };

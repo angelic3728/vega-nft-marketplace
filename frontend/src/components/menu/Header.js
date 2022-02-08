@@ -1,35 +1,18 @@
 import Cookies from "universal-cookie";
 import React, { useEffect, useState } from "react";
-import { navigate } from "@reach/router";
+// import { navigate } from "@reach/router";
 import { useSelector, useDispatch } from "react-redux";
 import * as actions from "../../store/actions";
 import Breakpoint, {
   BreakpointProvider,
   setDefaultBreakpoints,
 } from "react-socks";
-//import { header } from 'react-bootstrap';
 import { Link } from "@reach/router";
 import useOnclickOutside from "react-cool-onclickoutside";
-import {
-  Button,
-  Image,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  useDisclosure,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
 import * as selectors from "../../store/selectors";
-import { fetchAccessToken } from "../../store/actions/thunks";
 import { fetchAuthInfo } from "../../store/actions/thunks";
-const infuraRPCUrl = process.env.REACT_APP_INFURA_KEY;
-const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
-const web3 = createAlchemyWeb3(infuraRPCUrl);
+import ConnectWalletButton from "../../items/ConnectWalletButton";
+import SignoutElement from "../../items/SignoutElement";
 
 setDefaultBreakpoints([{ xs: 0 }, { l: 1199 }, { xl: 1200 }]);
 
@@ -48,12 +31,10 @@ const NavLink = (props) => (
 
 const Header = function (props) {
   const [openMenu, setOpenMenu] = useState(false);
-  const [clickedCreateBtn, setClickedCreateBtn] = useState(false);
   const dispatch = useDispatch();
   const accessTokenState = useSelector(selectors.accessTokenState);
   const authInfoState = useSelector(selectors.authInfoState);
   const authStatusState = useSelector(selectors.authStatusState);
-  const toast = useToast();
   const cookies = new Cookies();
 
   // UI operation part
@@ -67,8 +48,6 @@ const Header = function (props) {
   const ref = useOnclickOutside(() => {
     closeMenu();
   });
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [showmenu, btn_icon] = useState(false);
   const [showpop, btn_icon_pop] = useState(false);
@@ -92,111 +71,8 @@ const Header = function (props) {
   const authInfo = authInfoState.data ? authInfoState.data : {};
   const authStatus = authStatusState ? authStatusState : false;
   // Authentication part
-  const handleSignMessage = async (public_address, nonce) => {
-    try {
-      const signature = await web3.eth.personal.sign(
-        `I am signing into vega NFT marketplace with my one-time nonce: ${nonce}`,
-        public_address,
-        "" // MetaMask will ignore the password argument here
-      );
-      onClose();
-      return { public_address, signature };
-    } catch (err) {
-      toast({
-        title: err.message,
-        status: "error",
-        position: "top-right",
-        isClosable: true,
-      });
-      return false;
-    }
-  };
 
-  const handleSignup = (publicAddress) => {
-    return fetch(`${process.env.REACT_APP_BACKEND_URL}/vega/createuser`, {
-      body: JSON.stringify({ public_address: publicAddress }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    }).then((response) => response.json());
-  };
-
-  const connectMetamask = async () => {
-    // Check if MetaMask is installed
-    if (!window.ethereum) {
-      toast({
-        title: "Please install MetaMask first.",
-        status: "info",
-        position: "top-right",
-        isClosable: true,
-      });
-      return;
-    }
-    debugger;
-    const addressArray = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
-    
-    const publicAddress = addressArray[0].toLowerCase();
-    // Look if user with current publicAddress is already present on backend
-    var user_obj = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}/vega/singleuser?publicAddress=${publicAddress}`
-    ).then((response) => response.json());
-
-    let current_user =
-      user_obj.user.length && user_obj.user.length != 0
-        ? {
-            public_address: user_obj.user[0].public_address,
-            nonce: user_obj.user[0].nonce,
-          }
-        : await handleSignup(publicAddress);
-    // Popup MetaMask confirmation modal to sign message
-    let signature_obj = await handleSignMessage(
-      current_user.public_address,
-      current_user.nonce
-    );
-    if (signature_obj) {
-      // let tokenResult = await handleAuthenticate(signature_obj.public_address, signature_obj.signature);
-      dispatch(
-        fetchAccessToken(signature_obj.public_address, signature_obj.signature)
-      );
-      toast({
-        title: "Successfully logged in!",
-        status: "info",
-        position: "top-right",
-        isClosable: true,
-      });
-      dispatch(fetchAuthInfo(signature_obj.public_address));
-      if (clickedCreateBtn) navigate(`/create`);
-    }
-  };
-
-  const createBtnClicked = () => {
-    btn_icon(!showmenu);
-    setClickedCreateBtn(true);
-    onOpen();
-  };
-
-  const clickConnectWallet = () => {
-    onOpen();
-    setClickedCreateBtn(false);
-  };
-
-  const signOut = () => {
-    dispatch(actions.getAccessToken.failure());
-    dispatch(actions.setAuthStatus.failure());
-    cookies.remove(process.env.REACT_APP_TOKEN_COOKIE_NAME);
-    cookies.remove(process.env.REACT_APP_ADDRESS_COOKIE_NAME);
-    toast({
-      title: "Successfully logged out!",
-      status: "info",
-      position: "top-right",
-      isClosable: true,
-    });
-  };
-
-  useEffect(() => {
+  const handleScroll = () => {
     const header = document.getElementById("myHeader");
     const totop = document.getElementById("scroll-to-top");
     const sticky = header.offsetTop;
@@ -213,6 +89,13 @@ const Header = function (props) {
         closeMenu();
       }
     });
+
+    return () => {
+      window.removeEventListener("scroll", scrollCallBack);
+    };
+  };
+
+  useEffect(() => {
     const accessToken = cookies.get(process.env.REACT_APP_TOKEN_COOKIE_NAME);
     dispatch(actions.getAccessToken.success(accessToken));
     if (accessToken) {
@@ -222,17 +105,14 @@ const Header = function (props) {
       dispatch(fetchAuthInfo(publicAddress));
     }
 
-    return () => {
-      window.removeEventListener("scroll", scrollCallBack);
-    };
+    handleScroll();
   }, []);
 
   useEffect(() => {
     const publicAddress = cookies.get(
       process.env.REACT_APP_ADDRESS_COOKIE_NAME
     );
-    if(publicAddress !== undefined)
-    dispatch(fetchAuthInfo(publicAddress));
+    if (publicAddress !== undefined) dispatch(fetchAuthInfo(publicAddress));
   }, [accessToken]);
 
   return (
@@ -242,7 +122,7 @@ const Header = function (props) {
           <div className="logo px-0">
             <div className="navbar-title navbar-item">
               <NavLink to="/">
-                <Image src="/img/logos/logo-red.png" boxSize="55px" alt="#" />
+                <img src="/img/logos/logo-red.png" width="55px" alt="#" />
               </NavLink>
             </div>
           </div>
@@ -268,10 +148,7 @@ const Header = function (props) {
                     </NavLink>
                   </div>
                   <div className="navbar-item">
-                    <NavLink
-                      to={authStatus ? "/create" : "./"}
-                      onClick={authStatus ? null : createBtnClicked}
-                    >
+                    <NavLink to="/create">
                       Create
                       <span className="lines"></span>
                     </NavLink>
@@ -321,8 +198,7 @@ const Header = function (props) {
                   </div>
                   <div className="navbar-item">
                     <NavLink
-                      to={authStatus ? "/create" : "./"}
-                      onClick={authStatus ? null : createBtnClicked}
+                      to="/create"
                     >
                       Create
                       <span className="lines"></span>
@@ -366,9 +242,7 @@ const Header = function (props) {
           <div className="mainside">
             {!authStatus && (
               <div className="connect-wal">
-                <Button colorScheme="red" onClick={clickConnectWallet}>
-                  Connect Wallet
-                </Button>
+                <ConnectWalletButton />
               </div>
             )}
             {authStatus && (
@@ -514,9 +388,7 @@ const Header = function (props) {
                           </span>
                         </li>
                         <li>
-                          <span onClick={signOut}>
-                            <i className="fa fa-sign-out"></i> Sign out
-                          </span>
+                          <SignoutElement />
                         </li>
                       </ul>
                     </div>
@@ -526,43 +398,12 @@ const Header = function (props) {
             )}
           </div>
         </div>
-
         <button className="nav-icon" onClick={() => btn_icon(!showmenu)}>
           <div className="menu-line white"></div>
           <div className="menu-line1 white"></div>
           <div className="menu-line2 white"></div>
         </button>
       </div>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent py="2">
-          <ModalHeader>Connect Your Wallet</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody textAlign="center">
-            <Text>
-              Connect with one of available wallet providers or create a new
-              wallet.
-            </Text>
-            <Button
-              colorScheme="pink"
-              my="3"
-              leftIcon={<Image src="/img/wallet/1.png" boxSize="20px"></Image>}
-              onClick={connectMetamask}
-            >
-              Connect to Metamask
-            </Button>
-            <Text>
-              We do not own private keys and cannot access your funds without
-              your confirmation
-            </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </header>
   );
 };

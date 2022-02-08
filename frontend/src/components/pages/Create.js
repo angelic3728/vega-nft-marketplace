@@ -1,22 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Clock from "../partials/Common/Clock";
 import Footer from "../partials/Footer";
-import {
-  Button,
-  Image,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  useDisclosure,
-  Text,
-  useToast,
-  Spinner,
-} from "@chakra-ui/react";
-import { mintNFT } from "../../core/nft/interact";
+import { useCallWithGasPrice } from '../../hooks/useCallWithGasPrice';
+import { useNftTokenContract } from '../../hooks/useContracts'
+import useApproveConfirmTransaction from '../../hooks/useApproveConfirmTransaction'
+import useToast from '../../hooks/useToast'
+import { useWeb3React } from "@web3-react/core";
+import { uploadNFT } from "../../core/nft/interact";
 
 // import { createGlobalStyle } from 'styled-components';
 
@@ -38,9 +28,11 @@ const Create = () => {
   const [startDate, setStartDate] = useState("");
   const [expireDate, setExpireDate] = useState("");
   const [unlockContent, setUnlockContent] = useState("");
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
+  const [tokenId, setTokenId] = useState("");
+  const [tokenURI, setTokenURI] = useState("");
+  const nftTokenContract = useNftTokenContract();
+  const { account } = useWeb3React();
+  const { toastSuccess } = useToast()
 
   const handleShow = () => {
     setCreateMethod(1);
@@ -68,19 +60,27 @@ const Create = () => {
     document.getElementById("btn3").classList.add("active");
   };
 
-  const successToast = () => {
-    toast({
-      title: "Successfully minted!",
-      status: "info",
-      position: "top-right",
-      isClosable: true,
-    });
+  const createNFT = async () => {
+    const uploadRes =  await uploadNFT(title, description, mintFile);
+    if(uploadRes && uploadRes.success) {
+      setTokenId(uploadRes.metadata[0]);
+      setTokenURI(uploadRes.metadata[1]);
+    }
   };
 
-  const createNFT = () => {
-    onOpen();
-    mintNFT(title, description, mintFile, onClose, successToast);
-  };
+  const performMint = async () => {
+
+    const tx = await nftTokenContract.mintWithTokenURI(account, tokenId, tokenURI);
+    const receipt = await tx.wait();
+    console.log(receipt);
+    toastSuccess("Successfully performed!", receipt.blockHash);
+  }
+
+  useEffect(() => {
+    if(account && tokenId !== "" && tokenURI !== "") {
+      performMint()
+    }
+  }, [tokenId, tokenURI]);
 
   return (
     <div className="greyscheme">
@@ -105,19 +105,17 @@ const Create = () => {
 
               <div className="d-create-file" style={{ textAlign: "center" }}>
                 {fileUrl !== "" && (
-                  <Image
-                    borderRadius="10"
-                    boxSize="250px"
-                    objectFit="cover"
+                  <img
+                    width="250px"
                     src={fileUrl}
-                    style={{ margin: "0 auto" }}
+                    style={{ margin: "0 auto", borderRadius:10 }}
                     alt="NFT Asset"
                   />
                 )}
                 {fileUrl === "" && (
-                  <Text id="file_name" style={{ color: "white" }}>
+                  <p id="file_name" style={{ color: "white" }}>
                     Please choose one asset.
-                  </Text>
+                  </p>
                 )}
                 <div className="browse" style={{ marginTop: 10 }}>
                   <input
@@ -364,23 +362,6 @@ const Create = () => {
           </div>
         </div>
       </section>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent py="2">
-          <ModalHeader>Minting NFT</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody textAlign="center">
-            <Text>Please wait...</Text>
-            <Spinner
-              thickness="4px"
-              speed="1.65s"
-              emptyColor="gray.200"
-              color="blue.500"
-              size="xl"
-            />
-          </ModalBody>
-        </ModalContent>
-      </Modal>
       <Footer />
     </div>
   );
