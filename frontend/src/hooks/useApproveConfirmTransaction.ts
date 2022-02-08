@@ -109,10 +109,10 @@ const useApproveConfirmTransaction = ({
   }, [toastSuccess, onApprove, onApproveSuccess, state, toastError])
 
   const handleConfirm = useCallback(
-    async (params = {}) => {
+    async () => {
       dispatch({ type: 'confirm_sending' })
       try {
-        const tx = await onConfirm(params)
+        const tx = await onConfirm()
         toastSuccess(`'Transaction Submitted'`, tx.hash)
         const receipt = await tx.wait()
         if (receipt.status) {

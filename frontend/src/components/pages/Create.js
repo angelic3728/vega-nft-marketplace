@@ -30,7 +30,6 @@ const Create = () => {
   const [unlockContent, setUnlockContent] = useState("");
   const [tokenId, setTokenId] = useState("");
   const [tokenURI, setTokenURI] = useState("");
-  const { callWithGasPrice } = useCallWithGasPrice();
   const nftTokenContract = useNftTokenContract();
   const { account } = useWeb3React();
   const { toastSuccess } = useToast()
@@ -61,32 +60,26 @@ const Create = () => {
     document.getElementById("btn3").classList.add("active");
   };
 
-  const { isApproving, isApproved, isConfirmed, isConfirming, handleApprove, handleConfirm } =
-    useApproveConfirmTransaction({
-      onApprove: () => {
-        return true;
-      },
-      onConfirm: () => {
-        return callWithGasPrice(nftTokenContract, 'mintWithTokenUri', [account, tokenId, tokenURI]);
-      },
-      onSuccess: async ({ receipt }) => {
-        // Re-fetch profile
-        toastSuccess('Mint Performed', "Succefully performed minting.")
-      },
-    })
-
   const createNFT = async () => {
     const uploadRes =  await mintNFT(title, description, mintFile);
-    debugger;
     if(uploadRes && uploadRes.success) {
       setTokenId(uploadRes.metadata[0]);
       setTokenURI(uploadRes.metadata[1]);
     }
   };
 
+  const performMint = async () => {
+
+    const tx = await nftTokenContract.mintWithTokenURI(account, tokenId, tokenURI);
+    debugger;
+    const receipt = await tx.wait();
+    console.log(receipt);
+    toastSuccess("Successfully performed!", receipt.blockHash);
+  }
+
   useEffect(() => {
     if(account && tokenId !== "" && tokenURI !== "") {
-      handleConfirm();
+      performMint()
     }
   }, [tokenId, tokenURI]);
 
