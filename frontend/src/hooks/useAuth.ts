@@ -16,7 +16,7 @@ import {
   ConnectorNames,
   connectorLocalStorageKey,
 } from "@pancakeswap-libs/uikit";
-import useToast from './useToast'
+import useToast from "./useToast";
 import { hexlify } from "@ethersproject/bytes";
 import { toUtf8Bytes } from "@ethersproject/strings";
 import { connectorsByName } from "../utils/web3React";
@@ -29,50 +29,71 @@ const appChainId = process.env.REACT_APP_CHAIN_ID;
 const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
 const useAuth = () => {
-  const { chainId, activate, deactivate, account } = useWeb3React();
+  const { activate, deactivate, account } = useWeb3React();
   const { library, connector } = useWeb3Provider();
-  const { toastError, toastInfo } = useToast()
+  const { toastError, toastInfo } = useToast();
   const dispatch = useDispatch();
   const cookies = new Cookies();
 
-  const login = useCallback(
+  // const chainId = 3;
+
+  const conActivate = useCallback(
     (connectorID: ConnectorNames) => {
-      const wConnector = connectorsByName[connectorID];
-      if (wConnector) {
-        if (chainId && appChainId === chainId.toString()) {
-          signin(account, library, dispatch);
-        } else {
-          activate(wConnector, async (error: Error) => {
-            if (error instanceof UnsupportedChainIdError) {
-              const hasSetup = await setupNetwork();
-              if (hasSetup) {
-                signin(account, library, dispatch);
-                activate(wConnector);
-              }
-            } else {
-              window.localStorage.removeItem(connectorLocalStorageKey);
-              if (
-                error instanceof NoEthereumProviderError ||
-                error instanceof NoBscProviderError
-              ) {
-                toastError("Error", "No provider was found");
-              } else if (
-                error instanceof UserRejectedRequestErrorInjected ||
-                error instanceof UserRejectedRequestErrorWalletConnect
-              ) {
-                if (wConnector instanceof WalletConnectConnector) {
-                  const walletConnector = wConnector as WalletConnectConnector;
-                  walletConnector.walletConnectProvider = null;
-                }
-                toastInfo("Information", "Please authorize to access your account");
-              } else {
-                toastError("Error", error.message);
-              }
+      const connector = connectorsByName[connectorID];
+      if (connector) {
+        activate(connector, async (error: Error) => {
+          if (error instanceof UnsupportedChainIdError) {
+            const hasSetup = await setupNetwork();
+            if (hasSetup) {
+              activate(connector);
             }
-          });
-        }
+          } else {
+            logout();
+            window.localStorage.removeItem(connectorLocalStorageKey);
+            if (
+              error instanceof NoEthereumProviderError ||
+              error instanceof NoBscProviderError
+            ) {
+              toastError("Provider Error", "No provider was found");
+            } else if (
+              error instanceof UserRejectedRequestErrorInjected ||
+              error instanceof UserRejectedRequestErrorWalletConnect
+            ) {
+              if (connector instanceof WalletConnectConnector) {
+                const walletConnector = connector as WalletConnectConnector;
+                walletConnector.walletConnectProvider = null;
+              }
+              toastError(
+                "Authorization Error",
+                "Please authorize to access your account"
+              );
+            } else {
+              toastError(error.name, error.message);
+            }
+          }
+        });
       } else {
-        toastError("Error", "The connector config is wrong");
+        toastError("Unable to find connector", "The connector config is wrong");
+      }
+    },
+    [activate, toastError]
+  );
+
+  const login = useCallback(
+    async (connectorID: ConnectorNames) => {
+      if (account) {
+        signin(account, library, dispatch);
+      } else {
+        if (window.ethereum) {
+          const connector = connectorsByName[connectorID];
+          await activate(connector);
+          const public_address = window.ethereum.selectedAddress;
+          console.log("public address", public_address);
+          await signin(public_address, library, dispatch);
+
+        } else {
+          toastError("Unable to find connector", "The connector config is wrong");
+        }
       }
     },
     [activate]
@@ -149,7 +170,9 @@ const useAuth = () => {
         ]);
         mysignature = signature;
       } else {
-        mysignature = await provider.getSigner(public_address).signMessage(message);
+        mysignature = await provider
+          .getSigner(public_address)
+          .signMessage(message);
       }
       return { mysignature };
     } catch (err) {
@@ -157,7 +180,7 @@ const useAuth = () => {
     }
   };
 
-  return { login, logout };
+  return { conActivate, login, logout };
 };
 
 export default useAuth;

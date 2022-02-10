@@ -3066,6 +3066,27 @@ img.img-rounded{
     -webkit-box-shadow: none;
     color: $white;
 }
+
+.greyscheme textarea::-webkit-input-placeholder {
+  color: #8f80ba;
+}
+
+.greyscheme textarea:-moz-placeholder { /* Firefox 18- */
+  color: #8f80ba;
+}
+
+.greyscheme textarea::-moz-placeholder {  /* Firefox 19+ */
+  color: #8f80ba;
+}
+
+.greyscheme textarea:-ms-input-placeholder {
+  color: #8f80ba;
+}
+
+.greyscheme textarea::placeholder {
+  color: #8f80ba;
+}
+
 .greyscheme .list.s3 {
     display: inline;
     margin: 0;

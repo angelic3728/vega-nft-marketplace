@@ -19,6 +19,7 @@ import Activity from './pages/Activity';
 import Contact from './pages/Contact';
 import WalletPage from './pages/Wallet';
 
+import useEagerConnect from '../hooks/useEagerConnect'
 import { ToastListener } from '../contexts/ToastsContext'
 import { createGlobalStyle } from "styled-components";
 
@@ -32,6 +33,11 @@ export const ScrollTop = ({ children, location }) => {
   React.useEffect(() => window.scrollTo(0, 0), [location]);
   return children;
 };
+
+function GlobalHooks() {
+  useEagerConnect()
+  return null
+}
 
 const PosedRouter = ({ children }) => (
   <Location>
@@ -48,6 +54,7 @@ const PosedRouter = ({ children }) => (
 const App = () => (
   <div className="wraper">
     <GlobalStyles />
+    <GlobalHooks />
     <ToastListener />
     <Header />
     <PosedRouter>

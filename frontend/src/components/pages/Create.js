@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { useModal } from "@pancakeswap-libs/uikit";
 import Clock from "../partials/Common/Clock";
 import Footer from "../partials/Footer";
-import { useCallWithGasPrice } from '../../hooks/useCallWithGasPrice';
-import { useNftTokenContract } from '../../hooks/useContracts'
-import useApproveConfirmTransaction from '../../hooks/useApproveConfirmTransaction'
-import useToast from '../../hooks/useToast'
+import { useNftTokenContract } from "../../hooks/useContracts";
+import useToast from "../../hooks/useToast";
 import { useWeb3React } from "@web3-react/core";
 import { uploadNFT } from "../../core/nft/interact";
+import NumericalInput from "../../items/Inputs/NumericalInput";
+import NormalInput from "../../items/Inputs/NormalInput";
+import MintFlowModal from "../partials/Create/MintFlowModal";
 
 // import { createGlobalStyle } from 'styled-components';
 
@@ -32,7 +34,9 @@ const Create = () => {
   const [tokenURI, setTokenURI] = useState("");
   const nftTokenContract = useNftTokenContract();
   const { account } = useWeb3React();
-  const { toastSuccess } = useToast()
+  const { toastSuccess, toastWarning, toastError } = useToast();
+
+  const [onPresentMintFlowModal, onDismiss] = useModal(<MintFlowModal />);
 
   const handleShow = () => {
     setCreateMethod(1);
@@ -61,24 +65,37 @@ const Create = () => {
   };
 
   const createNFT = async () => {
-    const uploadRes =  await uploadNFT(title, description, mintFile);
-    if(uploadRes && uploadRes.success) {
-      setTokenId(uploadRes.metadata[0]);
-      setTokenURI(uploadRes.metadata[1]);
+    if (title !== "" && description !== "" && mintFile) {
+      onPresentMintFlowModal();
+      const uploadRes = await uploadNFT(title, description, mintFile);
+      if (uploadRes && uploadRes.success) {
+        setTokenId(uploadRes.metadata[0]);
+        setTokenURI(uploadRes.metadata[1]);
+      }
+    } else {
+      toastWarning("Warning", "Please fill in the necessary fields.");
     }
   };
 
   const performMint = async () => {
-
-    const tx = await nftTokenContract.mintWithTokenURI(account, tokenId, tokenURI);
-    const receipt = await tx.wait();
-    console.log(receipt);
-    toastSuccess("Successfully performed!", receipt.blockHash);
-  }
+    try {
+      const tx = await nftTokenContract.mintWithTokenURI(
+        account,
+        tokenId,
+        tokenURI
+      );
+      const receipt = await tx.wait();
+      onDismiss();
+      toastSuccess("Successfully performed!", receipt.blockHash);
+    } catch (err) {
+      onDismiss();
+      toastError("Error", "Error occured.");
+    }
+  };
 
   useEffect(() => {
-    if(account && tokenId !== "" && tokenURI !== "") {
-      performMint()
+    if (account && tokenId !== "" && tokenURI !== "") {
+      performMint();
     }
   }, [tokenId, tokenURI]);
 
@@ -102,13 +119,12 @@ const Create = () => {
           <div className="col-lg-7 offset-lg-1 mb-5">
             <div className="field-set">
               <h5>Upload file</h5>
-
               <div className="d-create-file" style={{ textAlign: "center" }}>
                 {fileUrl !== "" && (
                   <img
                     width="250px"
                     src={fileUrl}
-                    style={{ margin: "0 auto", borderRadius:10 }}
+                    style={{ margin: "0 auto", borderRadius: 10 }}
                     alt="NFT Asset"
                   />
                 )}
@@ -142,7 +158,6 @@ const Create = () => {
               </div>
 
               <div className="spacer-single"></div>
-
               <h5>Select method</h5>
               <div className="de_tab tab_methods">
                 <ul className="de_nav">
@@ -166,25 +181,17 @@ const Create = () => {
                 <div className="de_tab_content pt-3">
                   <div id="tab_opt_1">
                     <h5>Price</h5>
-                    <input
-                      type="text"
-                      name="item_price"
-                      id="item_price"
-                      className="form-control"
-                      placeholder="enter price for one item (ETH)"
+                    <NumericalInput
                       onChange={(e) => setPrice(e.target.value)}
+                      placeholder="enter price for one item (ETH)"
                     />
                   </div>
 
                   <div id="tab_opt_2" className="hide">
                     <h5>Minimum bid</h5>
-                    <input
-                      type="text"
-                      name="item_price_bid"
-                      id="item_price_bid"
-                      className="form-control"
-                      placeholder="enter minimum bid"
+                    <NormalInput
                       onChange={(e) => setMinBids(e.target.value)}
+                      placeholder="enter minimum bid"
                     />
 
                     <div className="spacer-20"></div>
@@ -256,11 +263,7 @@ const Create = () => {
 
                 {isActive ? (
                   <div id="unlockCtn" className="hide-content">
-                    <input
-                      type="text"
-                      name="item_unlock"
-                      id="item_unlock"
-                      className="form-control"
+                    <NormalInput
                       placeholder="Access key, code to redeem or link to a file..."
                       onChange={(e) => setUnlockContent(e.target.value)}
                     />
@@ -269,11 +272,7 @@ const Create = () => {
               </div>
 
               <h5>Title</h5>
-              <input
-                type="text"
-                name="item_title"
-                id="item_title"
-                className="form-control"
+              <NormalInput
                 placeholder="e.g. 'Crypto Funk"
                 onChange={(e) => setTitle(e.target.value)}
               />
@@ -293,11 +292,7 @@ const Create = () => {
               <div className="spacer-10"></div>
 
               <h5>Royalties</h5>
-              <input
-                type="text"
-                name="item_royalties"
-                id="item_royalties"
-                className="form-control"
+              <NumericalInput
                 placeholder="suggested: 0, 10%, 20%, 30%. Maximum is 70%"
                 onChange={(e) => setRoyaltie(e.target.value)}
               />
@@ -343,9 +338,9 @@ const Create = () => {
               </div>
               <div className="nft__item_info">
                 <span>
-                  <h4>NFT Title</h4>
+                  <h4>{title}</h4>
                 </span>
-                {(createMethod === 2 || createMethod === 3) && (
+                {(createMethod === 1 || createMethod === 3) && (
                   <div className="nft__item_price">{price} ETH</div>
                 )}
                 {(createMethod === 2 || createMethod === 3) && (
