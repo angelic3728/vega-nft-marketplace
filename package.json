@@ -2,14 +2,14 @@
   "name": "vega-nft-marketplace",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "backend/server.js",
+  "main": "server.js",
   "author": "Vladislav Nisivkin",
   "engines": {
     "node": "14.16.x",
     "npm": "6.14.x"
 },
   "scripts": {
-    "server": "node backend/server.js",
+    "server": "node server.js",
     "heroku-cleanup": "cd frontend && npm install --only=dev && npm install && npm run build"
   },
   "dependencies": {

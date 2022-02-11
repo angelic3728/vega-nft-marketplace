@@ -26,7 +26,7 @@ import { fetchAccessToken } from "../store/actions/thunks";
 import { fetchAuthInfo } from "../store/actions/thunks";
 
 const appChainId = process.env.REACT_APP_CHAIN_ID;
-const backendUrl = (process.env.NODE_ENV === "development")?process.env.REACT_APP_DEV_BACKEND_URL:process.env.REACT_APP_PROD_BACKEND_URL;
+const backendUrl = (process.env.NODE_ENV === "production")?process.env.REACT_APP_PROD_BACKEND_URL:process.env.REACT_APP_DEV_BACKEND_URL;
 
 const useAuth = () => {
   const { activate, deactivate, account } = useWeb3React();

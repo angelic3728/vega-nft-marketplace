@@ -1,9 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const HttpException = require("./utils/HttpException.utils");
-const errorMiddleware = require("./middleware/error.middleware");
-const router = require("./route");
+const HttpException = require("./backend/utils/HttpException.utils");
+const errorMiddleware = require("./backend/middleware/error.middleware");
+const router = require("./backend/route");
 
 // Init express
 const app = express();
@@ -15,7 +15,7 @@ app.use(express.json());
 // enabling cors for all requests by using cors middleware
 
 // for deployment
-app.use(express.static(path.join(__dirname, "../frontend", "build")));
+app.use(express.static(path.join(__dirname, "frontend", "build")));
 
 app.use(cors());
 // Enable pre-flight
@@ -36,7 +36,7 @@ app.use(errorMiddleware);
 
 // for deployment
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend", "build", "index.html"));
+  res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
 });
 
 // starting the server
