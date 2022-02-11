@@ -3,13 +3,15 @@ import * as actions from "../../actions";
 import Cookies from "universal-cookie";
 import api from "../../../core/api";
 
+const backendUrl = (process.env.NODE_ENV === "development")?process.env.REACT_APP_DEV_BACKEND_URL:process.env.REACT_APP_PROD_BACKEND_URL;
+
 export const fetchAccessToken =
   (public_address, signature) => async (dispatch) => {
     dispatch(actions.getAccessToken.request(Canceler.cancel));
     var form = { publicAddress: public_address, signature: signature };
     try {
       const { data } = await Axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/vega/ethsign`,
+        `${backendUrl}/vega/ethsign`,
         form
       );
       dispatch(actions.getAccessToken.success(data.accessToken));
@@ -37,7 +39,7 @@ export const fetchAuthInfo = (public_address) => async (dispatch) => {
   try {
     let query = public_address ? "publicAddress=" + public_address : "";
     const { data } = await Axios.get(
-      `${process.env.REACT_APP_BACKEND_URL}/vega/singleuser?${query}`, {
+      `${backendUrl}/vega/singleuser?${query}`, {
         cancelToken: Canceler.token,
         params: {},
       });
