@@ -5,8 +5,9 @@
   "main": "backend/server.js",
   "author": "Vladislav Nisivkin",
   "scripts": {
-    "server": "node backend/server.js",
-    "heroku-cleanup": "cd frontend && npm install --only=dev && npm install && npm run build"
+    "server": "nodemon backend/server.js",
+    "client": "cd frontend && yarn start",
+    "dev": "concurrently \"yarn run server\" \"yarn run client\""
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
