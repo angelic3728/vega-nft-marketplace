@@ -4,6 +4,10 @@
   "license": "MIT",
   "main": "backend/server.js",
   "author": "Vladislav Nisivkin",
+  "engines": {
+    "node": "14.16.x",
+    "npm": "6.14.x"
+},
   "scripts": {
     "server": "node backend/server.js",
     "heroku-cleanup": "cd frontend && npm install --only=dev && npm install && npm run build"
