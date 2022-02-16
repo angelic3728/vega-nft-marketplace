@@ -5,10 +5,9 @@ import { simpleRpcProvider } from "./providers";
 
 // Addresses
 import {
-  getAddress,
   getNFTTokenAddress,
-  getNFTMarketPlace,
-  getNFTAuction,
+  getNFTMarketPlaceAddress,
+  getNFTAuctionAddress,
 } from "./addressHelpers";
 
 // ABI
@@ -30,11 +29,11 @@ export const getNftTokenContract = (
 export const getMarketplaceContract = (
   signer?: Signer | Provider
 ) => {
-  return getContract(marketplaceAbi, getNFTMarketPlace(), signer);
+  return getContract(marketplaceAbi, getNFTMarketPlaceAddress(), signer);
 };
 
 export const getAuctionContract = (
   signer?: Signer | Provider
 ) => {
-  return getContract(auctionAbi, getNFTAuction(), signer);
+  return getContract(auctionAbi, getNFTAuctionAddress(), signer);
 };

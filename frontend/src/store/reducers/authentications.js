@@ -10,7 +10,8 @@ import {
 export const defaultState = {
   accessToken: initEntityState(null),
   authInfo: initEntityState(null),
-  authStatus: false
+  authStatus: false,
+  myBalance: 0,
 };
 
 const states = (state = defaultState, action) => {
@@ -52,6 +53,12 @@ const states = (state = defaultState, action) => {
       return {
         ...state,
         authStatus: false,
+      };
+
+    case getType(actions.getMyBalance):
+      return {
+        ...state,
+        myBalance: action.payload,
       };
 
     default:

@@ -4,11 +4,13 @@ import { createSelector, createStructuredSelector } from "reselect";
 export const accessTokenState = (state) => state.auth.accessToken;
 export const authInfoState = (state) => state.auth.authInfo;
 export const authStatusState = (state) => state.auth.authStatus;
+export const myBalanceState = (state) => state.auth.myBalance;
 
 //Store Selectors
 export const nftBreakdownState = (state) => state.NFT.nftBreakdown;
 export const nftShowcaseState = (state) => state.NFT.nftShowcase;
 export const nftDetailState = (state) => state.NFT.nftDetail;
+export const creationStatusState = (state) => state.NFT.creationStatus;
 export const hotCollectionsState = (state) => state.hotCollection.hotCollections;
 export const authorsState = (state) => state.authors.authorList;
 export const authorRankingsState = (state) => state.authors.authorRanking;

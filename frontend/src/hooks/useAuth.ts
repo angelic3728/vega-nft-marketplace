@@ -24,9 +24,13 @@ import { setupNetwork } from "../utils/wallet";
 import * as actions from "../store/actions";
 import { fetchAccessToken } from "../store/actions/thunks";
 import { fetchAuthInfo } from "../store/actions/thunks";
+import { Web3Provider } from "@ethersproject/providers";
+import { Dispatch } from "redux";
 
-const appChainId = process.env.REACT_APP_CHAIN_ID;
-const backendUrl = (process.env.NODE_ENV === "production")?process.env.REACT_APP_PROD_BACKEND_URL:process.env.REACT_APP_DEV_BACKEND_URL;
+const backendUrl =
+  process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_PROD_BACKEND_URL
+    : process.env.REACT_APP_DEV_BACKEND_URL;
 
 const useAuth = () => {
   const { activate, deactivate, account } = useWeb3React();
@@ -48,7 +52,6 @@ const useAuth = () => {
               activate(connector);
             }
           } else {
-            logout();
             window.localStorage.removeItem(connectorLocalStorageKey);
             if (
               error instanceof NoEthereumProviderError ||
@@ -88,11 +91,12 @@ const useAuth = () => {
           const connector = connectorsByName[connectorID];
           await activate(connector);
           const public_address = window.ethereum.selectedAddress;
-          console.log("public address", public_address);
           await signin(public_address, library, dispatch);
-
         } else {
-          toastError("Unable to find connector", "The connector config is wrong");
+          toastError(
+            "Unable to find connector",
+            "The connector config is wrong"
+          );
         }
       }
     },
@@ -112,10 +116,20 @@ const useAuth = () => {
     toastInfo("Information", "Successfully logout!");
   }, [deactivate]);
 
-  const signin = async (public_address, provider, dispatch) => {
-    var user_obj = await fetch(
-      `${backendUrl}/vega/singleuser?publicAddress=${public_address}`
-    ).then((response) => response.json());
+  const signin = async (
+    public_address: string,
+    provider: Web3Provider | undefined,
+    dispatch: Dispatch<any>
+  ) => {
+    var user_obj = [];
+
+    try {
+      user_obj = await fetch(
+        `${backendUrl}/vega/singleuser?publicAddress=${public_address}`
+      ).then((response) => response.json());
+    } catch (err) {
+      toastError("Error", err.message);
+    }
 
     let current_user =
       user_obj.user.length && user_obj.user.length != 0
@@ -138,7 +152,7 @@ const useAuth = () => {
     }
   };
 
-  const handleSignup = (publicAddress) => {
+  const handleSignup = (publicAddress: any) => {
     return fetch(`${backendUrl}/vega/createuser`, {
       body: JSON.stringify({ public_address: publicAddress }),
       headers: {
@@ -148,7 +162,21 @@ const useAuth = () => {
     }).then((response) => response.json());
   };
 
-  const handleSignMessage = async (public_address, nonce, provider) => {
+  const handleSignMessage = async (
+    public_address: string,
+    nonce: any,
+    provider: {
+      provider: { wc: { signPersonalMessage: (arg0: any[]) => any } };
+      getSigner: (arg0: any) => {
+        (): any;
+        new (): any;
+        signMessage: {
+          (arg0: string): string | PromiseLike<string>;
+          new (): any;
+        };
+      };
+    }
+  ) => {
     try {
       var mysignature = "";
       const message = `I am signing into vega NFT marketplace with my one-time nonce: ${nonce}`;

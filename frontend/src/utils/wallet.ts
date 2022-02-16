@@ -20,34 +20,33 @@ export const setupNetwork = async () => {
       return true;
     } catch (switchError) {
       console.log(switchError.message);
-      return false;
-      // if (switchError.code === 4902) {
-      //   try {
-      //     await provider.request({
-      //       method: "wallet_addEthereumChain",
-      //       params: [
-      //         {
-      //           chainId: `0x${chainId.toString(16)}`,
-      //           chainName: `Ropsten ${chainType}`,
-      //           nativeCurrency: {
-      //             name: "ETH",
-      //             symbol: "eth",
-      //             decimals: 18,
-      //           },
-      //           rpcUrls: nodes,
-      //           blockExplorerUrls: [`${BASE_SCAN_URL}/`],
-      //         },
-      //       ],
-      //     });
-      //     return true;
-      //   } catch (error) {
-      //     console.error("Failed to setup the network in Metamask:", error);
-      //     return false;
-      //   }
-      // } else {
-      //   console.log(switchError.message);
-      //   return false;
-      // }
+      if (switchError.code === 4902) {
+        try {
+          await provider.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: `0x${chainId.toString(16)}`,
+                chainName: `Ropsten ${chainType}`,
+                nativeCurrency: {
+                  name: "ETH",
+                  symbol: "eth",
+                  decimals: 18,
+                },
+                rpcUrls: nodes,
+                blockExplorerUrls: [`${BASE_SCAN_URL}/`],
+              },
+            ],
+          });
+          return true;
+        } catch (error) {
+          console.error("Failed to setup the network in Metamask:", error);
+          return false;
+        }
+      } else {
+        console.log(switchError.message);
+        return false;
+      }
     }
   } else {
     console.error(

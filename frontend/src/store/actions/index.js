@@ -21,6 +21,8 @@ export const setAuthStatus = asyncAction(
     'auth/SET_AUTH_FAIL',
 )();
 
+export const getMyBalance = action('auth/GET_MY_BALANCE')();
+
 export const getNftBreakdown = asyncAction(
     'nft/GET_NFT_BREAKDOWN',
     'nft/GET_NFT_BREAKDOWN_SUCCESS',
@@ -88,3 +90,4 @@ export const filterStatus = action('nft/FILTER_STATUS')();
 export const filterItemsType = action('nft/FILTER_ITEMS_TYPE')();
 export const filterCollections = action('nft/FILTER_COLLECTIONS')();
 export const filterNftTitle = action('nft/FILTER_NFT_TITLE')();
+export const setCreationStatus = action('nft/CREATION_STATUS')();

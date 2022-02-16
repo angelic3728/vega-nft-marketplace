@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const path = require("path");
 const HttpException = require("./backend/utils/HttpException.utils");
 const errorMiddleware = require("./backend/middleware/error.middleware");
 const router = require("./backend/route");

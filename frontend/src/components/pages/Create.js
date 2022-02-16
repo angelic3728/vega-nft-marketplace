@@ -1,16 +1,23 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import DatePicker from "react-datepicker";
 import { useModal } from "@pancakeswap-libs/uikit";
+import { useWeb3React } from "@web3-react/core";
 import Clock from "../partials/Common/Clock";
 import Footer from "../partials/Footer";
+import * as selectors from "../../store/selectors";
+import { setCreationStatus } from "../../store/actions";
 import { useNftTokenContract } from "../../hooks/useContracts";
+import { useMarketplaceContract } from "../../hooks/useContracts";
+import { useAuctionContract } from "../../hooks/useContracts";
+import { getNFTTokenAddress } from "../../utils/addressHelpers";
+import { toWeiBalance } from "../../utils/getBalance";
 import useToast from "../../hooks/useToast";
-import { useWeb3React } from "@web3-react/core";
 import { uploadNFT } from "../../core/nft/interact";
 import NumericalInput from "../../items/Inputs/NumericalInput";
 import NormalInput from "../../items/Inputs/NormalInput";
 import MintFlowModal from "../partials/Create/MintFlowModal";
-
-// import { createGlobalStyle } from 'styled-components';
+import "react-datepicker/dist/react-datepicker.css";
 
 //IMPORT DYNAMIC STYLED COMPONENT
 import { StyledHeader } from "../Styles";
@@ -18,6 +25,7 @@ import { StyledHeader } from "../Styles";
 const theme = "GREYLOGIN"; //LIGHT, GREY, RETRO
 
 const Create = () => {
+  const dispatch = useDispatch();
   const [createMethod, setCreateMethod] = useState(1);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -26,78 +34,144 @@ const Create = () => {
   const [royaltie, setRoyaltie] = useState(0);
   const [fileUrl, setFileUrl] = useState("");
   const [mintFile, setMintFile] = useState(null);
-  const [minBids, setMinBids] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [expireDate, setExpireDate] = useState("");
+  const [endDate, setEndDate] = useState(new Date());
   const [unlockContent, setUnlockContent] = useState("");
   const [tokenId, setTokenId] = useState("");
   const [tokenURI, setTokenURI] = useState("");
   const nftTokenContract = useNftTokenContract();
+  const marketplaceContract = useMarketplaceContract();
+  const auctionContract = useAuctionContract();
+  const nftTokenAddress = getNFTTokenAddress();
   const { account } = useWeb3React();
   const { toastSuccess, toastWarning, toastError } = useToast();
 
-  const [onPresentMintFlowModal, onDismiss] = useModal(<MintFlowModal />);
-
-  const handleShow = () => {
-    setCreateMethod(1);
-    document.getElementById("tab_opt_1").classList.add("show");
-    document.getElementById("tab_opt_1").classList.remove("hide");
-    document.getElementById("tab_opt_2").classList.remove("show");
-    document.getElementById("btn1").classList.add("active");
-    document.getElementById("btn2").classList.remove("active");
-    document.getElementById("btn3").classList.remove("active");
-  };
-  const handleShow1 = () => {
-    setCreateMethod(2);
-    document.getElementById("tab_opt_1").classList.add("hide");
-    document.getElementById("tab_opt_1").classList.remove("show");
-    document.getElementById("tab_opt_2").classList.add("show");
-    document.getElementById("btn1").classList.remove("active");
-    document.getElementById("btn2").classList.add("active");
-    document.getElementById("btn3").classList.remove("active");
-  };
-  const handleShow2 = () => {
-    setCreateMethod(3);
-    document.getElementById("tab_opt_1").classList.add("show");
-    document.getElementById("btn1").classList.remove("active");
-    document.getElementById("btn2").classList.remove("active");
-    document.getElementById("btn3").classList.add("active");
-  };
+  const [onPresentMintFlowModal, onDismiss] = useModal(
+    <MintFlowModal createMethod={createMethod} />,
+    false
+  );
+  const myBalanceState = useSelector(selectors.myBalanceState);
+  const myBalance = myBalanceState ? myBalanceState : 0;
 
   const createNFT = async () => {
-    if (title !== "" && description !== "" && mintFile) {
-      onPresentMintFlowModal();
-      const uploadRes = await uploadNFT(title, description, mintFile);
-      if (uploadRes && uploadRes.success) {
-        setTokenId(uploadRes.metadata[0]);
-        setTokenURI(uploadRes.metadata[1]);
-      }
+    if (myBalance < 0.0005) {
+      toastError(
+        "Insufficient Balance",
+        "You can't mint the asset because of insufficient balance in your wallet."
+      );
     } else {
-      toastWarning("Warning", "Please fill in the necessary fields.");
+      if (title.trim().length === 0) {
+        toastWarning("Warning", "Please fill in the Title field.");
+      } else if (description.length === 0) {
+        toastWarning("Warning", "Please fill in the Description field.");
+      } else if (!mintFile) {
+        toastWarning("Warning", "Please select the asset file.");
+      } else if (Number(price) === 0) {
+        toastWarning("Warning", "Please fill in the Price field.");
+      } else if (royaltie.trim().length === 0) {
+        toastWarning("Warning", "Please fill in the Royaltie field.");
+      } else {
+        onPresentMintFlowModal();
+        const uploadRes = await uploadNFT(title, description, mintFile);
+        if (uploadRes && uploadRes.success) {
+          dispatch(setCreationStatus(1));
+          setTokenId(Number(uploadRes.metadata[0].toString().substr(-6)));
+          setTokenURI(uploadRes.metadata[1]);
+          performMint();
+        } else {
+          debugger;
+          onDismiss();
+          toastError("Error", uploadRes.status);
+        }
+      }
     }
   };
 
   const performMint = async () => {
     try {
+      debugger;
       const tx = await nftTokenContract.mintWithTokenURI(
         account,
         tokenId,
         tokenURI
       );
       const receipt = await tx.wait();
-      onDismiss();
-      toastSuccess("Successfully performed!", receipt.blockHash);
+      dispatch(setCreationStatus(2));
+      if (createMethod === 1 || createMethod === 3) {
+        listingMarketplace();
+      } else {
+        createAuction();
+      }
     } catch (err) {
+      debugger;
       onDismiss();
-      toastError("Error", "Error occured.");
+      dispatch(setCreationStatus(0));
+      toastError("Error", err.message);
     }
   };
 
-  useEffect(() => {
-    if (account && tokenId !== "" && tokenURI !== "") {
-      performMint();
+  const listingMarketplace = async () => {
+    try {
+      const tx = await marketplaceContract.createListing(
+        tokenId.toString(),
+        true,
+        nftTokenAddress,
+        tokenId,
+        toWeiBalance(price),
+        account,
+        1,
+        "0xc778417e063141139fce010982780140aa0cd5ab"
+      );
+      const receipt = await tx.wait();
+      dispatch(setCreationStatus(3));
+      if (createMethod === 3) {
+        createAuction();
+      } else {
+        onDismiss();
+        dispatch(setCreationStatus(0));
+        toastSuccess("Contratlations", "Successfully listed!");
+        resetAssets();
+      }
+    } catch (err) {
+      onDismiss();
+      dispatch(setCreationStatus(0));
+      toastError("Error", err.message);
     }
-  }, [tokenId, tokenURI]);
+  };
+
+  const createAuction = async () => {
+    try {
+      const tx = await auctionContract.createAuction(
+        tokenId.toString(),
+        true,
+        nftTokenAddress,
+        tokenId,
+        account,
+        1,
+        endDate.toISOString(),
+        "0xc778417e063141139fce010982780140aa0cd5ab"
+      );
+      const receipt = await tx.wait();
+      dispatch(setCreationStatus(4));
+      onDismiss();
+      dispatch(setCreationStatus(0));
+      toastSuccess("Contratlations", "Successfully opened!");
+      resetAssets();
+    } catch (err) {
+      onDismiss();
+      dispatch(setCreationStatus(0));
+      toastError("Error", err.message);
+    }
+  };
+
+  const resetAssets = () => {
+    setTitle("");
+    setDescription("");
+    setPrice("");
+    setCreateMethod(1);
+    setIsActive(false);
+    setUnlockContent("");
+    setRoyaltie("");
+  };
 
   return (
     <div className="greyscheme">
@@ -161,17 +235,29 @@ const Create = () => {
               <h5>Select method</h5>
               <div className="de_tab tab_methods">
                 <ul className="de_nav">
-                  <li id="btn1" className="active" onClick={handleShow}>
+                  <li
+                    id="btn1"
+                    className={createMethod === 1 ? "active" : ""}
+                    onClick={(e) => setCreateMethod(1)}
+                  >
                     <span>
                       <i className="fa fa-tag"></i>Fixed price
                     </span>
                   </li>
-                  <li id="btn2" onClick={handleShow1}>
+                  <li
+                    id="btn2"
+                    className={createMethod === 2 ? "active" : ""}
+                    onClick={(e) => setCreateMethod(2)}
+                  >
                     <span>
                       <i className="fa fa-hourglass-1"></i>Timed auction
                     </span>
                   </li>
-                  <li id="btn3" onClick={handleShow2}>
+                  <li
+                    id="btn3"
+                    className={createMethod === 3 ? "active" : ""}
+                    onClick={(e) => setCreateMethod(3)}
+                  >
                     <span>
                       <i className="fa fa-users"></i>Open for bids
                     </span>
@@ -179,7 +265,12 @@ const Create = () => {
                 </ul>
 
                 <div className="de_tab_content pt-3">
-                  <div id="tab_opt_1">
+                  <div
+                    id="tab_opt_1"
+                    className={
+                      createMethod === 1 || createMethod === 3 ? "show" : "hide"
+                    }
+                  >
                     <h5>Price</h5>
                     <NumericalInput
                       onChange={(e) => setPrice(e.target.value)}
@@ -187,35 +278,19 @@ const Create = () => {
                     />
                   </div>
 
-                  <div id="tab_opt_2" className="hide">
-                    <h5>Minimum bid</h5>
-                    <NormalInput
-                      onChange={(e) => setMinBids(e.target.value)}
-                      placeholder="enter minimum bid"
-                    />
-
+                  <div
+                    id="tab_opt_2"
+                    className={createMethod === 1 ? "hide" : "show"}
+                  >
                     <div className="spacer-20"></div>
-
                     <div className="row">
                       <div className="col-md-6">
-                        <h5>Starting date</h5>
-                        <input
-                          type="date"
-                          name="bid_starting_date"
-                          id="bid_starting_date"
-                          className="form-control"
-                          min="1997-01-01"
-                          onChange={(e) => setStartDate(e.target.value)}
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <h5>Expiration date</h5>
-                        <input
-                          type="date"
-                          name="bid_expiration_date"
-                          id="bid_expiration_date"
-                          className="form-control"
-                          onChange={(e) => setExpireDate(e.target.value)}
+                        <h5>Auction End Date</h5>
+                        <DatePicker
+                          selected={endDate}
+                          minDate={new Date()}
+                          onChange={(date) => setEndDate(date)}
+                          disabledKeyboardNavigation
                         />
                       </div>
                     </div>
@@ -267,6 +342,7 @@ const Create = () => {
                       placeholder="Access key, code to redeem or link to a file..."
                       onChange={(e) => setUnlockContent(e.target.value)}
                     />
+                    <div className="spacer-20"></div>
                   </div>
                 ) : null}
               </div>
@@ -277,7 +353,7 @@ const Create = () => {
                 onChange={(e) => setTitle(e.target.value)}
               />
 
-              <div className="spacer-10"></div>
+              <div className="spacer-20"></div>
 
               <h5>Description</h5>
               <textarea
@@ -289,7 +365,7 @@ const Create = () => {
                 onChange={(e) => setDescription(e.target.value)}
               ></textarea>
 
-              <div className="spacer-10"></div>
+              <div className="spacer-20"></div>
 
               <h5>Royalties</h5>
               <NumericalInput
@@ -297,7 +373,7 @@ const Create = () => {
                 onChange={(e) => setRoyaltie(e.target.value)}
               />
 
-              <div className="spacer-10"></div>
+              <div className="spacer-20"></div>
 
               <input
                 type="button"

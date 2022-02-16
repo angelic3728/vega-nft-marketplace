@@ -9,9 +9,9 @@ export const getAddress = (address: Address): string => {
 export const getNFTTokenAddress = () => {
   return getAddress(addresses.nftToken);
 };
-export const getNFTMarketPlace = () => {
+export const getNFTMarketPlaceAddress = () => {
   return getAddress(addresses.nftMarketplace);
 };
-export const getNFTAuction = () => {
+export const getNFTAuctionAddress = () => {
   return getAddress(addresses.nftAuction);
 };

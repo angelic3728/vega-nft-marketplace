@@ -70,9 +70,9 @@ const Footer= () => (
                             <div className="de-flex">
                                 <div className="de-flex-col">
                                     <span onClick={()=> window.open("", "_self")}>
-                                        <img alt="" className="f-logo d-1" src="./img/logo.png" />
-                                        <img alt="" className="f-logo d-3" src="./img/logo-2-light.png" />
-                                        <img alt="" className="f-logo d-4" src="./img/logo-3.png" />
+                                        <img alt="" className="f-logo d-1" width="150" src="./img/logos/logo-word-red.png" />
+                                        <img alt="" className="f-logo d-3" width="150" src="./img/logos/logo-word-blue.png" />
+                                        <img alt="" className="f-logo d-4" width="50" src="./img/logos/logo-red.png" />
                                         <span className="copy">&copy; Copyright 2022 - VegaNFT</span>
                                     </span>
                                 </div>

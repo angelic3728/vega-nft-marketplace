@@ -1,7 +1,7 @@
 import Cookies from "universal-cookie";
-import React, { useEffect, useState } from "react";
-// import { navigate } from "@reach/router";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useWeb3React } from "@web3-react/core";
 import * as actions from "../../store/actions";
 import Breakpoint, {
   BreakpointProvider,
@@ -9,8 +9,10 @@ import Breakpoint, {
 } from "react-socks";
 import { Link } from "@reach/router";
 import useOnclickOutside from "react-cool-onclickoutside";
+import { getBalance } from "../../utils/getBalance";
 import * as selectors from "../../store/selectors";
 import { fetchAuthInfo } from "../../store/actions/thunks";
+import { getMyBalance } from '../../store/actions';
 import ConnectWalletButton from "../../items/ConnectWalletButton";
 import SignoutElement from "../../items/SignoutElement";
 
@@ -35,7 +37,9 @@ const Header = function (props) {
   const accessTokenState = useSelector(selectors.accessTokenState);
   const authInfoState = useSelector(selectors.authInfoState);
   const authStatusState = useSelector(selectors.authStatusState);
+  const myBalanceState = useSelector(selectors.myBalanceState);
   const cookies = new Cookies();
+  const { account } = useWeb3React();
 
   // UI operation part
   const handleMenuOpen = () => {
@@ -70,7 +74,7 @@ const Header = function (props) {
     : "";
   const authInfo = authInfoState.data ? authInfoState.data : {};
   const authStatus = authStatusState ? authStatusState : false;
-  // Authentication part
+  const myBalance = myBalanceState? myBalanceState: 0;
 
   const handleScroll = () => {
     const header = document.getElementById("myHeader");
@@ -95,6 +99,11 @@ const Header = function (props) {
     };
   };
 
+  const getBal = async (publicAddress) => {
+    let wallet_balance = await getBalance(publicAddress);
+    dispatch(getMyBalance(wallet_balance));
+  }
+
   useEffect(() => {
     const accessToken = cookies.get(process.env.REACT_APP_TOKEN_COOKIE_NAME);
     dispatch(actions.getAccessToken.success(accessToken));
@@ -112,7 +121,10 @@ const Header = function (props) {
     const publicAddress = cookies.get(
       process.env.REACT_APP_ADDRESS_COOKIE_NAME
     );
-    if (publicAddress !== undefined) dispatch(fetchAuthInfo(publicAddress));
+    if (publicAddress !== undefined) {
+      dispatch(fetchAuthInfo(publicAddress));
+      getBal(publicAddress);
+    }
   }, [accessToken]);
 
   return (
@@ -364,7 +376,7 @@ const Header = function (props) {
                       </div>
                       <div className="d-balance">
                         <h4>Balance</h4>
-                        12.858 ETH
+                        {myBalance}
                       </div>
                       <div className="d-wallet">
                         <h4>My Wallet</h4>
