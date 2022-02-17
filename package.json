@@ -10,7 +10,7 @@
 },
   "scripts": {
     "start": "node server.js",
-    "build": "cd frontend && npm run build"
+    "heroku-cleanup": "cd frontend && npm install --only=dev && npm install && npm run build"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
