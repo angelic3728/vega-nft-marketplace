@@ -64,7 +64,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "rimraf ./build && rimraf ./node_modules && yarn && react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
