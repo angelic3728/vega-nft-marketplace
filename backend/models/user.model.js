@@ -30,8 +30,10 @@ class UserModel {
     }
 
     create = async ({ public_address, nonce = Math.floor(Math.random() * 10000), role = Role.User }) => {
+        
         const sql = `INSERT INTO ${this.tableName}
         (public_address, nonce, role) VALUES ("${public_address}", ${nonce}, ${role})`;
+        console.log("sql  "+sql);
         await query(sql, [public_address, role]);
         return {user:[public_address, nonce]};
     }

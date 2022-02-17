@@ -35,7 +35,7 @@ class UserController {
     const user = await UserModel.findOne({
       public_address: req.query.publicAddress,
     });
-
+    console.log(user);
     if (!user) {
       res.send({ user: [] });
     } else {
@@ -60,6 +60,7 @@ class UserController {
   };
 
   createUser = async (req, res, next) => {
+    console.log(req.body);
     const result = await UserModel.create(req.body);
     if (!result) {
       throw new HttpException(500, "Something went wrong");

@@ -2,6 +2,7 @@ import Cookies from "universal-cookie";
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
+import { AbstractConnector } from "@web3-react/abstract-connector";
 import { BscConnector, NoBscProviderError } from "@binance-chain/bsc-connector";
 import {
   NoEthereumProviderError,
@@ -17,9 +18,7 @@ import {
   connectorLocalStorageKey,
 } from "@pancakeswap-libs/uikit";
 import useToast from "./useToast";
-import { hexlify } from "@ethersproject/bytes";
-import { toUtf8Bytes } from "@ethersproject/strings";
-import { connectorsByName } from "../utils/web3React";
+import { connectorsByName, signMessage } from "../utils/web3React";
 import { setupNetwork } from "../utils/wallet";
 import * as actions from "../store/actions";
 import { fetchAccessToken } from "../store/actions/thunks";
@@ -27,10 +26,7 @@ import { fetchAuthInfo } from "../store/actions/thunks";
 import { Web3Provider } from "@ethersproject/providers";
 import { Dispatch } from "redux";
 
-const backendUrl =
-  process.env.NODE_ENV === "production"
-    ? process.env.REACT_APP_PROD_BACKEND_URL
-    : process.env.REACT_APP_DEV_BACKEND_URL;
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
 const useAuth = () => {
   const { activate, deactivate, account } = useWeb3React();
@@ -84,14 +80,14 @@ const useAuth = () => {
 
   const login = useCallback(
     async (connectorID: ConnectorNames) => {
+      const connector = connectorsByName[connectorID];
       if (account) {
-        signin(account, library, dispatch);
+        signin(connector, account, library, dispatch);
       } else {
-        if (window.ethereum) {
-          const connector = connectorsByName[connectorID];
+        if (connectorID==="injected" && window.ethereum) {
           await activate(connector);
           const public_address = window.ethereum.selectedAddress;
-          await signin(public_address, library, dispatch);
+          await signin(connector, public_address, library, dispatch);
         } else {
           toastError(
             "Unable to find connector",
@@ -117,6 +113,7 @@ const useAuth = () => {
   }, [deactivate]);
 
   const signin = async (
+    connector: AbstractConnector,
     public_address: string,
     provider: Web3Provider | undefined,
     dispatch: Dispatch<any>
@@ -140,14 +137,16 @@ const useAuth = () => {
         : await handleSignup(public_address);
 
     // Popup MetaMask confirmation modal to sign message
-    let signature_obj = await handleSignMessage(
+    const message = `I am signing into vega NFT marketplace with my one-time nonce: ${current_user.nonce}`;
+    let mySignature = await signMessage(
+      connector,
+      provider,
       current_user.public_address,
-      current_user.nonce,
-      provider
+      message
     );
 
-    if (signature_obj) {
-      await dispatch(fetchAccessToken(account, signature_obj.mysignature));
+    if (mySignature) {
+      await dispatch(fetchAccessToken(account, mySignature));
       await dispatch(fetchAuthInfo(account));
     }
   };
@@ -160,52 +159,6 @@ const useAuth = () => {
       },
       method: "POST",
     }).then((response) => response.json());
-  };
-
-  const handleSignMessage = async (
-    public_address: string,
-    nonce: any,
-    provider: {
-      provider: { wc: { signPersonalMessage: (arg0: any[]) => any } };
-      getSigner: (arg0: any) => {
-        (): any;
-        new (): any;
-        signMessage: {
-          (arg0: string): string | PromiseLike<string>;
-          new (): any;
-        };
-      };
-    }
-  ) => {
-    try {
-      var mysignature = "";
-      const message = `I am signing into vega NFT marketplace with my one-time nonce: ${nonce}`;
-      if (window.BinanceChain && connector instanceof BscConnector) {
-        const { signature } = await window.BinanceChain.bnbSign(
-          public_address,
-          message
-        );
-        mysignature = signature;
-      } else if (provider.provider?.wc) {
-        /**
-         * Wallet Connect does not sign the message correctly unless you use their method
-         * @see https://github.com/WalletConnect/walletconnect-monorepo/issues/462
-         */
-        const wcMessage = hexlify(toUtf8Bytes(message));
-        const signature = await provider.provider?.wc.signPersonalMessage([
-          wcMessage,
-          public_address,
-        ]);
-        mysignature = signature;
-      } else {
-        mysignature = await provider
-          .getSigner(public_address)
-          .signMessage(message);
-      }
-      return { mysignature };
-    } catch (err) {
-      return false;
-    }
   };
 
   return { conActivate, login, logout };

@@ -12,6 +12,7 @@ import { useMarketplaceContract } from "../../hooks/useContracts";
 import { useAuctionContract } from "../../hooks/useContracts";
 import { getNFTTokenAddress } from "../../utils/addressHelpers";
 import { toWeiBalance } from "../../utils/getBalance";
+import getBlockNumber from "../../utils/getBlockNumber";
 import useToast from "../../hooks/useToast";
 import { uploadNFT } from "../../core/nft/interact";
 import NumericalInput from "../../items/Inputs/NumericalInput";
@@ -36,14 +37,14 @@ const Create = () => {
   const [mintFile, setMintFile] = useState(null);
   const [endDate, setEndDate] = useState(new Date());
   const [unlockContent, setUnlockContent] = useState("");
-  const [tokenId, setTokenId] = useState("");
-  const [tokenURI, setTokenURI] = useState("");
   const nftTokenContract = useNftTokenContract();
   const marketplaceContract = useMarketplaceContract();
   const auctionContract = useAuctionContract();
   const nftTokenAddress = getNFTTokenAddress();
   const { account } = useWeb3React();
   const { toastSuccess, toastWarning, toastError } = useToast();
+
+  const erc20TokenAddress = process.env.REACT_APP_ERC20_TOKEN_ADDRESS;
 
   const [onPresentMintFlowModal, onDismiss] = useModal(
     <MintFlowModal createMethod={createMethod} />,
@@ -59,26 +60,26 @@ const Create = () => {
         "You can't mint the asset because of insufficient balance in your wallet."
       );
     } else {
+      const currentTime = new Date();
       if (title.trim().length === 0) {
         toastWarning("Warning", "Please fill in the Title field.");
       } else if (description.length === 0) {
         toastWarning("Warning", "Please fill in the Description field.");
       } else if (!mintFile) {
         toastWarning("Warning", "Please select the asset file.");
-      } else if (Number(price) === 0) {
+      } else if ((createMethod === 1 || createMethod === 3) && Number(price) === 0) {
         toastWarning("Warning", "Please fill in the Price field.");
       } else if (royaltie.trim().length === 0) {
         toastWarning("Warning", "Please fill in the Royaltie field.");
+      } else if ((createMethod === 2 || createMethod === 3) && ((endDate.getTime() - currentTime.getTime()) < 0)) {
+        toastWarning("Warning", "Please fill the end Date from tomorrow.");
       } else {
         onPresentMintFlowModal();
         const uploadRes = await uploadNFT(title, description, mintFile);
         if (uploadRes && uploadRes.success) {
           dispatch(setCreationStatus(1));
-          setTokenId(Number(uploadRes.metadata[0].toString().substr(-6)));
-          setTokenURI(uploadRes.metadata[1]);
-          performMint();
+          performMint(uploadRes.metadata[0], uploadRes.metadata[1]);
         } else {
-          debugger;
           onDismiss();
           toastError("Error", uploadRes.status);
         }
@@ -86,30 +87,29 @@ const Create = () => {
     }
   };
 
-  const performMint = async () => {
+  const performMint = async (id, uri) => {
     try {
-      debugger;
       const tx = await nftTokenContract.mintWithTokenURI(
         account,
-        tokenId,
-        tokenURI
+        id,
+        uri
       );
       const receipt = await tx.wait();
-      dispatch(setCreationStatus(2));
       if (createMethod === 1 || createMethod === 3) {
-        listingMarketplace();
+        dispatch(setCreationStatus(2));
+        listingMarketplace(id);
       } else {
-        createAuction();
+        dispatch(setCreationStatus(3));
+        createAuction(id);
       }
     } catch (err) {
-      debugger;
       onDismiss();
       dispatch(setCreationStatus(0));
       toastError("Error", err.message);
     }
   };
 
-  const listingMarketplace = async () => {
+  const listingMarketplace = async (tokenId) => {
     try {
       const tx = await marketplaceContract.createListing(
         tokenId.toString(),
@@ -119,12 +119,12 @@ const Create = () => {
         toWeiBalance(price),
         account,
         1,
-        "0xc778417e063141139fce010982780140aa0cd5ab"
+        erc20TokenAddress
       );
       const receipt = await tx.wait();
       dispatch(setCreationStatus(3));
       if (createMethod === 3) {
-        createAuction();
+        createAuction(tokenId);
       } else {
         onDismiss();
         dispatch(setCreationStatus(0));
@@ -135,11 +135,13 @@ const Create = () => {
       onDismiss();
       dispatch(setCreationStatus(0));
       toastError("Error", err.message);
+      resetAssets();
     }
   };
 
-  const createAuction = async () => {
+  const createAuction = async (tokenId) => {
     try {
+      const endBlockNumber = await getBlockNumber(endDate);
       const tx = await auctionContract.createAuction(
         tokenId.toString(),
         true,
@@ -147,8 +149,8 @@ const Create = () => {
         tokenId,
         account,
         1,
-        endDate.toISOString(),
-        "0xc778417e063141139fce010982780140aa0cd5ab"
+        endBlockNumber,
+        erc20TokenAddress
       );
       const receipt = await tx.wait();
       dispatch(setCreationStatus(4));
@@ -160,6 +162,7 @@ const Create = () => {
       onDismiss();
       dispatch(setCreationStatus(0));
       toastError("Error", err.message);
+      resetAssets();
     }
   };
 
@@ -273,6 +276,7 @@ const Create = () => {
                   >
                     <h5>Price</h5>
                     <NumericalInput
+                      value={price}
                       onChange={(e) => setPrice(e.target.value)}
                       placeholder="enter price for one item (ETH)"
                     />
@@ -340,6 +344,7 @@ const Create = () => {
                   <div id="unlockCtn" className="hide-content">
                     <NormalInput
                       placeholder="Access key, code to redeem or link to a file..."
+                      value={unlockContent}
                       onChange={(e) => setUnlockContent(e.target.value)}
                     />
                     <div className="spacer-20"></div>
@@ -350,6 +355,7 @@ const Create = () => {
               <h5>Title</h5>
               <NormalInput
                 placeholder="e.g. 'Crypto Funk"
+                value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
 
@@ -360,6 +366,7 @@ const Create = () => {
                 data-autoresize
                 name="item_desc"
                 id="item_desc"
+                value={description}
                 className="form-control"
                 placeholder="e.g. 'This is very limited item'"
                 onChange={(e) => setDescription(e.target.value)}
@@ -370,6 +377,7 @@ const Create = () => {
               <h5>Royalties</h5>
               <NumericalInput
                 placeholder="suggested: 0, 10%, 20%, 30%. Maximum is 70%"
+                value={royaltie}
                 onChange={(e) => setRoyaltie(e.target.value)}
               />
 

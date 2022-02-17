@@ -8,7 +8,7 @@ import { toUtf8Bytes } from "@ethersproject/strings";
 import { Web3Provider } from "@ethersproject/providers";
 
 const POLLING_INTERVAL = 12000;
-const rpcUrl = "https://ropsten.infura.io/v3/24bxzRYXiIpIcS1tnuqjlNRMqpv";
+const rpcUrl = process.env.REACT_APP_RPC_URL;
 const chainId = 3;
 
 const injected = new InjectedConnector({ supportedChainIds: [chainId] });

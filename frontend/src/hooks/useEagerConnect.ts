@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
+import { useDispatch } from "react-redux";
 import { connectorLocalStorageKey, ConnectorNames } from '@pancakeswap-libs/uikit'
 import useAuth from './useAuth'
 import { connectorsByName } from '../utils/web3React'
 import { useWeb3React } from '@web3-react/core'
+import { getBalance } from "../utils/getBalance";
+import { getMyBalance } from '../store/actions';
 
 const _binanceChainListener = async () =>
   new Promise<void>((resolve) =>
@@ -20,7 +23,8 @@ const _binanceChainListener = async () =>
 
 const useEagerConnect = () => {
   const { conActivate } = useAuth()
-  const { activate } = useWeb3React()
+  const { activate, account } = useWeb3React()
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const connectorId = window.localStorage.getItem(connectorLocalStorageKey) as ConnectorNames
@@ -50,7 +54,16 @@ const useEagerConnect = () => {
         }
       })
     }
-  }, [activate, conActivate])
+
+    if(account) {
+      getBal(account);
+    }
+  }, [account, activate, conActivate])
+
+  const getBal = async (account: string) => {
+    let wallet_balance = await getBalance(account);
+    dispatch(getMyBalance(wallet_balance));
+  }
 }
 
 export default useEagerConnect

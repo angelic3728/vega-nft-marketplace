@@ -14,7 +14,7 @@ export const uploadNFT = async (name, description, file) => {
     const pinataFileUrl = fileUpload.pinataFileUrl;
     const timestamp = fileUpload.timestamp;
     var upload_time = new Date(timestamp);
-    const tokenId = upload_time.getTime();
+    const tokenId = Number(upload_time.getTime().toString().substr(-6));
     //make metadata
     const metadata = {};
     metadata.name = name;
@@ -39,34 +39,5 @@ export const uploadNFT = async (name, description, file) => {
       success: true,
       metadata:[tokenId, tokenURI]
     };
-
-    // const transactionParameters = {
-    //   to: process.env.REACT_APP_NFT_TOKEN_ADDRESS, // Required except during contract publications.
-    //   from: window.ethereum.selectedAddress, // must match user's active address.
-    //   data: window.contract.methods
-    //     .mintWithTokenURI(window.ethereum.selectedAddress, tokenId, tokenURI)
-    //     .encodeABI(),
-    // };
-
-    // try {
-    //   const txHash = await window.ethereum.request({
-    //     method: "eth_sendTransaction",
-    //     params: [transactionParameters],
-    //   });
-    //   onClose();
-    //   successToast();
-    //   return {
-    //     success: true,
-    //     status:
-    //       "Check out your transaction on Etherscan: https://ropsten.etherscan.io/tx/" +
-    //       txHash,
-    //   };
-    // } catch (error) {
-    //   onClose();
-    //   return {
-    //     success: false,
-    //     status: "Something went wrong: " + error.message,
-    //   };
-    // }
   }
 };

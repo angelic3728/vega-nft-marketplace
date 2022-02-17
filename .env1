@@ -1,7 +1,7 @@
 # DB Configurations
-DB_HOST=15.204.152.186
+DB_HOST=localhost
 DB_USER=root
-DB_PASS="MySQL!2022#r00T"
+DB_PASS=
 DB_DATABASE=vega_db
 
 

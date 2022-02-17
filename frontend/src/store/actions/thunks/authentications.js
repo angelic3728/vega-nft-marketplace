@@ -3,7 +3,7 @@ import * as actions from "../../actions";
 import Cookies from "universal-cookie";
 import api from "../../../core/api";
 
-const backendUrl = (process.env.NODE_ENV === "production")?process.env.REACT_APP_PROD_BACKEND_URL:process.env.REACT_APP_DEV_BACKEND_URL;
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
 export const fetchAccessToken =
   (public_address, signature) => async (dispatch) => {
