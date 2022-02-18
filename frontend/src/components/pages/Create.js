@@ -62,6 +62,7 @@ const Create = () => {
         "You can't mint the asset because of insufficient balance in your wallet."
       );
     } else {
+      debugger;
       const currentTime = new Date();
       if (title.trim().length === 0) {
         toastWarning("Warning", "Please fill in the Title field.");
@@ -71,7 +72,7 @@ const Create = () => {
         toastWarning("Warning", "Please select the asset file.");
       } else if ((createMethod === 1 || createMethod === 3) && Number(price) === 0) {
         toastWarning("Warning", "Please fill in the Price field.");
-      } else if (royaltie.trim().length === 0) {
+      } else if (royaltie === "") {
         toastWarning("Warning", "Please fill in the Royaltie field.");
       } else if ((createMethod === 2 || createMethod === 3) && ((endDate.getTime() - currentTime.getTime()) < 0)) {
         toastWarning("Warning", "Please fill the end Date from tomorrow.");
