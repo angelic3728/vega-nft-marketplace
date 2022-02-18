@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
 import { AbstractConnector } from "@web3-react/abstract-connector";
+import useActiveWeb3React from "./useActiveWeb3React";
 import { BscConnector, NoBscProviderError } from "@binance-chain/bsc-connector";
 import {
   NoEthereumProviderError,
@@ -12,7 +13,6 @@ import {
   UserRejectedRequestError as UserRejectedRequestErrorWalletConnect,
   WalletConnectConnector,
 } from "@web3-react/walletconnect-connector";
-import useWeb3Provider from "./useActiveWeb3React";
 import {
   ConnectorNames,
   connectorLocalStorageKey,
@@ -25,12 +25,14 @@ import { fetchAccessToken } from "../store/actions/thunks";
 import { fetchAuthInfo } from "../store/actions/thunks";
 import { Web3Provider } from "@ethersproject/providers";
 import { Dispatch } from "redux";
+import { getBalance } from "../utils/getBalance";
+import { getMyBalance } from '../store/actions';
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
 const useAuth = () => {
   const { activate, deactivate, account } = useWeb3React();
-  const { library, connector } = useWeb3Provider();
+  const { library } = useActiveWeb3React();
   const { toastError, toastInfo } = useToast();
   const dispatch = useDispatch();
   const cookies = new Cookies();
@@ -82,9 +84,9 @@ const useAuth = () => {
     async (connectorID: ConnectorNames) => {
       const connector = connectorsByName[connectorID];
       if (account) {
-        signin(connector, account, library, dispatch);
+        await signin(connector, account, library, dispatch);
       } else {
-        if (connectorID==="injected" && window.ethereum) {
+        if (connectorID === "injected" && window.ethereum) {
           await activate(connector);
           const public_address = window.ethereum.selectedAddress;
           await signin(connector, public_address, library, dispatch);
@@ -96,7 +98,7 @@ const useAuth = () => {
         }
       }
     },
-    [activate]
+    [activate, library]
   );
 
   const logout = useCallback(() => {
@@ -129,7 +131,7 @@ const useAuth = () => {
     }
 
     let current_user =
-      user_obj.user.length && user_obj.user.length != 0
+      user_obj.user && user_obj.user.length != 0
         ? {
             public_address: user_obj.user[0].public_address,
             nonce: user_obj.user[0].nonce,
@@ -146,6 +148,8 @@ const useAuth = () => {
     );
 
     if (mySignature) {
+      let wallet_balance = await getBalance(account);
+      await dispatch(getMyBalance(wallet_balance));
       await dispatch(fetchAccessToken(account, mySignature));
       await dispatch(fetchAuthInfo(account));
     }

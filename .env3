@@ -1,0 +1,10 @@
+# DB Configurations
+DB_HOST=db4free.net
+DB_USER=angel3728
+DB_PASS="123!@#qweQWE"
+DB_DATABASE=vegamarket
+
+
+# local runtime configs
+PORT=5000
+SECRET_JWT=vegasecret

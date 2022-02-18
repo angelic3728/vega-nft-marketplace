@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Input } from "@pancakeswap-libs/uikit";
 import styled from "styled-components";
 import debounce from "lodash/debounce";
@@ -33,6 +33,7 @@ const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`); // match escaped "." charac
 const NormalInput: React.FC<Props> = ({
   onChange: onChangeCallback,
   placeholder = "---",
+  value
 }) => {
   const [normalText, setNormalText] = useState("");
 
@@ -52,6 +53,10 @@ const NormalInput: React.FC<Props> = ({
     }
     debouncedOnChange(e);
   };
+
+  useEffect(() => {
+    setNormalText(value);
+  }, [value]);
 
   return (
     <InputWrapper>

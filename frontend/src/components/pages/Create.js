@@ -1,8 +1,8 @@
+import Cookies from "universal-cookie";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import DatePicker from "react-datepicker";
 import { useModal } from "@pancakeswap-libs/uikit";
-import { useWeb3React } from "@web3-react/core";
 import Clock from "../partials/Common/Clock";
 import Footer from "../partials/Footer";
 import * as selectors from "../../store/selectors";
@@ -27,6 +27,7 @@ const theme = "GREYLOGIN"; //LIGHT, GREY, RETRO
 
 const Create = () => {
   const dispatch = useDispatch();
+  const [publicAddress, setPublicAddress] = useState("");
   const [createMethod, setCreateMethod] = useState(1);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -41,8 +42,9 @@ const Create = () => {
   const marketplaceContract = useMarketplaceContract();
   const auctionContract = useAuctionContract();
   const nftTokenAddress = getNFTTokenAddress();
-  const { account } = useWeb3React();
   const { toastSuccess, toastWarning, toastError } = useToast();
+
+  const cookies = new Cookies();
 
   const erc20TokenAddress = process.env.REACT_APP_ERC20_TOKEN_ADDRESS;
 
@@ -90,7 +92,7 @@ const Create = () => {
   const performMint = async (id, uri) => {
     try {
       const tx = await nftTokenContract.mintWithTokenURI(
-        account,
+        publicAddress,
         id,
         uri
       );
@@ -117,7 +119,7 @@ const Create = () => {
         nftTokenAddress,
         tokenId,
         toWeiBalance(price),
-        account,
+        publicAddress,
         1,
         erc20TokenAddress
       );
@@ -147,7 +149,7 @@ const Create = () => {
         true,
         nftTokenAddress,
         tokenId,
-        account,
+        publicAddress,
         1,
         endBlockNumber,
         erc20TokenAddress
@@ -175,6 +177,14 @@ const Create = () => {
     setUnlockContent("");
     setRoyaltie("");
   };
+
+  useEffect(() => {
+    const publicAddress = cookies.get(
+      process.env.REACT_APP_ADDRESS_COOKIE_NAME
+    );
+
+    setPublicAddress(publicAddress);
+  }, []);
 
   return (
     <div className="greyscheme">
@@ -321,7 +331,6 @@ const Create = () => {
                     <label
                       htmlFor="switch-unlock"
                       onClick={() => {
-                        debugger;
                         setIsActive(false);
                       }}
                     ></label>
@@ -329,7 +338,6 @@ const Create = () => {
                     <label
                       htmlFor="switch-unlock"
                       onClick={() => {
-                        debugger;
                         setIsActive(true);
                       }}
                     ></label>

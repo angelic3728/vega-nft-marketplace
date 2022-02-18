@@ -4,8 +4,6 @@ const mysql2 = require('mysql2');
 
 class DBConnection {
     constructor() {
-        console.log(process.env.DB_HOST);
-        console.log(process.env.DB_PASS);
         this.db = mysql2.createPool({
             host: process.env.DB_HOST,
             user: process.env.DB_USER,
@@ -65,3 +63,4 @@ const HttpStatusCodes = Object.freeze({
 
 
 module.exports = new DBConnection().query;
+

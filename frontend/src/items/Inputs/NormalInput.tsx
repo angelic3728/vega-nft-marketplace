@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Input } from "@pancakeswap-libs/uikit";
 import styled from "styled-components";
 import debounce from "lodash/debounce";
@@ -30,6 +30,7 @@ interface Props {
 const NormalInput: React.FC<Props> = ({
   onChange: onChangeCallback,
   placeholder = "---",
+  value
 }) => {
   const [normalText, setNormalText] = useState("");
 
@@ -46,6 +47,10 @@ const NormalInput: React.FC<Props> = ({
     setNormalText(e.target.value);
     debouncedOnChange(e);
   };
+
+  useEffect(() => {
+    setNormalText(value);
+  }, [value]);
 
   return (
     <InputWrapper>

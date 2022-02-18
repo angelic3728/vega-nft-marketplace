@@ -8,7 +8,7 @@ REACT_APP_ERC20_TOKEN_ADDRESS = "0xc778417e063141139fce010982780140aa0cd5ab"
 REACT_APP_AVARAGE_BLOCK_TIME = 13
 REACT_APP_BASE_SCAN_URL = "https://ropsten.etherscan.io"
 
-REACT_APP_BACKEND_URL="http://localhost:2083"
+REACT_APP_BACKEND_URL="https://veganft.herokuapp.com"
 
 REACT_APP_TOKEN_COOKIE_NAME="vega_access_token"
 REACT_APP_ADDRESS_COOKIE_NAME="vega_public_address"

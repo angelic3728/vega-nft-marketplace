@@ -16,7 +16,7 @@ const injected = new InjectedConnector({ supportedChainIds: [chainId] });
 const walletconnect = new WalletConnectConnector({
   rpc: { [chainId]: rpcUrl },
   qrcode: true,
-  pollingInterval: POLLING_INTERVAL
+  pollingInterval: POLLING_INTERVAL,
 });
 
 const bscConnector = new BscConnector({ supportedChainIds: [chainId] });
@@ -24,7 +24,7 @@ const bscConnector = new BscConnector({ supportedChainIds: [chainId] });
 export const connectorsByName: { [connectorName in ConnectorNames]: any } = {
   [ConnectorNames.Injected]: injected,
   [ConnectorNames.WalletConnect]: walletconnect,
-  [ConnectorNames.BSC]: bscConnector
+  [ConnectorNames.BSC]: bscConnector,
 };
 
 export const getLibrary = (provider): Web3Provider => {
@@ -43,23 +43,28 @@ export const signMessage = async (
   account: string,
   message: string
 ): Promise<string> => {
-  if (window.BinanceChain && connector instanceof BscConnector) {
-    const { signature } = await window.BinanceChain.bnbSign(account, message);
-    return signature;
-  }
+  try {
+    if (window.BinanceChain && connector instanceof BscConnector) {
+      const { signature } = await window.BinanceChain.bnbSign(account, message);
+      return signature;
+    }
 
-  /**
-   * Wallet Connect does not sign the message correctly unless you use their method
-   * @see https://github.com/WalletConnect/walletconnect-monorepo/issues/462
-   */
-  if (provider.provider?.wc) {
-    const wcMessage = hexlify(toUtf8Bytes(message));
-    const signature = await provider.provider?.wc.signPersonalMessage([
-      wcMessage,
-      account
-    ]);
-    return signature;
-  }
+    /**
+     * Wallet Connect does not sign the message correctly unless you use their method
+     * @see https://github.com/WalletConnect/walletconnect-monorepo/issues/462
+     */
+    if (provider.provider?.wc) {
+      const wcMessage = hexlify(toUtf8Bytes(message));
+      const signature = await provider.provider?.wc.signPersonalMessage([
+        wcMessage,
+        account,
+      ]);
+      return signature;
+    }
 
-  return provider.getSigner(account).signMessage(message);
+    const inj_signature = await provider.getSigner(account).signMessage(message);
+    return inj_signature;
+  } catch (err) {
+    console.log(err.message);
+  }
 };

@@ -10,7 +10,6 @@ const Wallet = function () {
         method: "eth_accounts",
       });
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
-      debugger;
       // Check if user is connected to Mainnet
       if (chainId != "0x19") {
         alert("Please connect to Ropsten");

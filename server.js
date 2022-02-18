@@ -22,7 +22,7 @@ app.use(cors());
 // Enable pre-flight
 app.options("*", cors());
 
-const port = Number(process.env.PORT || 5000);
+const port = Number(process.env.PORT || 2083);
 
 app.use(`/vega`, router);
 
