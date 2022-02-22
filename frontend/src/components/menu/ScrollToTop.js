@@ -1,49 +1,38 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from "react";
 
-export default class ScrollToTop extends Component {
+const ScrollToTop = function () {
+  const [isVisible, setIsVisible] = useState(false);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      is_visible: false
-    };
-  }
-
-  componentDidMount() {
-    var scrollComponent = this;
-    document.addEventListener("scroll", function(e) {
-      scrollComponent.toggleVisibility();
-    });
-  }
-
-  toggleVisibility() {
+  const toggleVisibility = () => {
     if (window.pageYOffset > 600) {
-      this.setState({
-        is_visible: true
-      });
-    } else { this.setState({
-        is_visible: false
-      });
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
     }
-  }
+  };
 
-  scrollToTop() {
+  const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth"
+      behavior: "smooth",
     });
-  }
+  };
 
-  render() {
-    const { is_visible } = this.state;
-    return (
-      <div id='scroll-to-top' className='init'>
-        {is_visible && (
-          <div onClick={() => this.scrollToTop()}>
-            <i className=""></i>
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+  useEffect(() => {
+    document.addEventListener("scroll", function () {
+      toggleVisibility();
+    });
+  }, []);
+
+  return (
+    <div id="scroll-to-top" className="init">
+      {isVisible && (
+        <div onClick={scrollToTop}>
+          <i className=""></i>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ScrollToTop;

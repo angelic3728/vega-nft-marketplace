@@ -26,6 +26,7 @@ const InputWrapper = styled.div`
 interface Props {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  value: string;
 }
 
 const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`); // match escaped "." characters via in a non-capturing group
@@ -47,7 +48,7 @@ const NormalInput: React.FC<Props> = ({
   );
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let nextUserInput = e.target.value;
+    const nextUserInput = e.target.value;
     if (nextUserInput === "" || inputRegex.test(escapeRegExp(nextUserInput))) {
       setNormalText(nextUserInput);
     }

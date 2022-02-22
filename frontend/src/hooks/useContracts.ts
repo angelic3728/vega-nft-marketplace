@@ -6,18 +6,27 @@ import {
   getAuctionContract,
 } from "../utils/contractHelpers";
 
-export const useNftTokenContract = (address: string) => {
+export const useNftTokenContract = () => {
   const { library } = useActiveWeb3React();
-  return useMemo(() => getNftTokenContract(library.getSigner()), [library]);
+  if(library)
+    return useMemo(() => getNftTokenContract(library.getSigner()), [library]);
+  else
+  return {};
 };
 
-export const useMarketplaceContract = (address: string) => {
+export const useMarketplaceContract = () => {
     const { library } = useActiveWeb3React();
+    if(library)
     return useMemo(() => getMarketplaceContract(library.getSigner()), [library]);
+    else
+    return {};
   };
 
-  export const useAuctionContract = (address: string) => {
+  export const useAuctionContract = () => {
     const { library } = useActiveWeb3React();
+    if(library)
     return useMemo(() => getAuctionContract(library.getSigner()), [library]);
+    else
+    return {};
   };
   

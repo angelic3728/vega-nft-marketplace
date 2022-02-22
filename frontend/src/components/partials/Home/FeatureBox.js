@@ -41,7 +41,7 @@ const Featurebox= () => (
                 </Reveal>
                   <div className="text">
                     <Reveal className='onStep' keyframes={fadeInUp} delay={100} duration={600} triggerOnce>
-                      <h4 className="">Add your NFT's</h4>
+                      <h4 className="">Add your NFT&apos;s</h4>
                     </Reveal>
                     <Reveal className='onStep' keyframes={fadeInUp} delay={200} duration={600} triggerOnce>
                       <p className="">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem.</p>
@@ -58,7 +58,7 @@ const Featurebox= () => (
                 </Reveal>
                   <div className="text">
                     <Reveal className='onStep' keyframes={fadeInUp} delay={100} duration={600} triggerOnce>
-                      <h4 className="">Sell your NFT's</h4>
+                      <h4 className="">Sell your NFT&apos;s</h4>
                     </Reveal>
                     <Reveal className='onStep' keyframes={fadeInUp} delay={200} duration={600} triggerOnce>
                       <p className="">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem.</p>

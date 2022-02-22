@@ -39,7 +39,7 @@ export const fetchNftShowcase = () => async (dispatch) => {
   }
 };
 
-export const fetchNftDetail = (nftId) => async (dispatch) => {
+export const fetchNftDetail = () => async (dispatch) => {
 
   dispatch(actions.getNftDetail.request(Canceler.cancel));
 

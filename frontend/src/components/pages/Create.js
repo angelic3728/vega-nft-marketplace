@@ -1,5 +1,5 @@
+import React, { useEffect, useState } from "react";
 import Cookies from "universal-cookie";
-import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import DatePicker from "react-datepicker";
 import { useModal } from "@pancakeswap-libs/uikit";
@@ -62,7 +62,6 @@ const Create = () => {
         "You can't mint the asset because of insufficient balance in your wallet."
       );
     } else {
-      debugger;
       const currentTime = new Date();
       if (title.trim().length === 0) {
         toastWarning("Warning", "Please fill in the Title field.");
@@ -92,12 +91,12 @@ const Create = () => {
 
   const performMint = async (id, uri) => {
     try {
-      const tx = await nftTokenContract.mintWithTokenURI(
+      await nftTokenContract.mintWithTokenURI(
         publicAddress,
         id,
         uri
       );
-      const receipt = await tx.wait();
+      // const receipt = await tx.wait();
       if (createMethod === 1 || createMethod === 3) {
         dispatch(setCreationStatus(2));
         listingMarketplace(id);
@@ -114,7 +113,7 @@ const Create = () => {
 
   const listingMarketplace = async (tokenId) => {
     try {
-      const tx = await marketplaceContract.createListing(
+      await marketplaceContract.createListing(
         tokenId.toString(),
         true,
         nftTokenAddress,
@@ -124,7 +123,7 @@ const Create = () => {
         1,
         erc20TokenAddress
       );
-      const receipt = await tx.wait();
+      // const receipt = await tx.wait();
       dispatch(setCreationStatus(3));
       if (createMethod === 3) {
         createAuction(tokenId);
@@ -145,7 +144,7 @@ const Create = () => {
   const createAuction = async (tokenId) => {
     try {
       const endBlockNumber = await getBlockNumber(endDate);
-      const tx = await auctionContract.createAuction(
+      await auctionContract.createAuction(
         tokenId.toString(),
         true,
         nftTokenAddress,
@@ -155,7 +154,7 @@ const Create = () => {
         endBlockNumber,
         erc20TokenAddress
       );
-      const receipt = await tx.wait();
+      // const receipt = await tx.wait();
       dispatch(setCreationStatus(4));
       onDismiss();
       dispatch(setCreationStatus(0));
@@ -237,7 +236,7 @@ const Create = () => {
                       setMintFile(file);
                       var reader = new FileReader();
                       reader.readAsDataURL(file);
-                      reader.onloadend = function (e) {
+                      reader.onloadend = function () {
                         setFileUrl(reader.result);
                       }.bind(this);
                     }}
@@ -252,7 +251,7 @@ const Create = () => {
                   <li
                     id="btn1"
                     className={createMethod === 1 ? "active" : ""}
-                    onClick={(e) => setCreateMethod(1)}
+                    onClick={() => setCreateMethod(1)}
                   >
                     <span>
                       <i className="fa fa-tag"></i>Fixed price
@@ -261,7 +260,7 @@ const Create = () => {
                   <li
                     id="btn2"
                     className={createMethod === 2 ? "active" : ""}
-                    onClick={(e) => setCreateMethod(2)}
+                    onClick={() => setCreateMethod(2)}
                   >
                     <span>
                       <i className="fa fa-hourglass-1"></i>Timed auction
@@ -270,7 +269,7 @@ const Create = () => {
                   <li
                     id="btn3"
                     className={createMethod === 3 ? "active" : ""}
-                    onClick={(e) => setCreateMethod(3)}
+                    onClick={() => setCreateMethod(3)}
                   >
                     <span>
                       <i className="fa fa-users"></i>Open for bids

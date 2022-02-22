@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
 import { AbstractConnector } from "@web3-react/abstract-connector";
 import useActiveWeb3React from "./useActiveWeb3React";
-import { BscConnector, NoBscProviderError } from "@binance-chain/bsc-connector";
+import { NoBscProviderError } from "@binance-chain/bsc-connector";
 import {
   NoEthereumProviderError,
   UserRejectedRequestError as UserRejectedRequestErrorInjected,
@@ -26,7 +26,7 @@ import { fetchAuthInfo } from "../store/actions/thunks";
 import { Web3Provider } from "@ethersproject/providers";
 import { Dispatch } from "redux";
 import { getBalance } from "../utils/getBalance";
-import { getMyBalance } from '../store/actions';
+import { getMyBalance } from "../store/actions";
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
@@ -83,19 +83,30 @@ const useAuth = () => {
   const login = useCallback(
     async (connectorID: ConnectorNames) => {
       const connector = connectorsByName[connectorID];
-      if (account) {
-        await signin(connector, account, library, dispatch);
-      } else {
-        if (connectorID === "injected" && window.ethereum) {
-          await activate(connector);
-          const public_address = window.ethereum.selectedAddress;
-          await signin(connector, public_address, library, dispatch);
+      if (connectorID === "injected") {
+        if (account) {
+          await signin(connector, account, library, dispatch);
         } else {
-          toastError(
-            "Unable to find connector",
-            "The connector config is wrong"
-          );
+          if (window.ethereum) {
+            await activate(connector);
+            const public_address = window.ethereum.selectedAddress;
+            if (public_address)
+              await signin(connector, public_address, library, dispatch);
+            else
+              toastError(
+                "Unable to find Connector",
+                "Please Connect Metamask firstly."
+              );
+          } else {
+            toastError(
+              "Unable to find connector",
+              "The connector config is wrong"
+            );
+          }
         }
+      } else {
+        await conActivate(connectorID);
+        if (account) await signin(connector, account, library, dispatch);
       }
     },
     [activate, library]
@@ -104,8 +115,10 @@ const useAuth = () => {
   const logout = useCallback(() => {
     dispatch(actions.getAccessToken.failure());
     dispatch(actions.setAuthStatus.failure());
-    cookies.remove(process.env.REACT_APP_TOKEN_COOKIE_NAME);
-    cookies.remove(process.env.REACT_APP_ADDRESS_COOKIE_NAME);
+    if (process.env.REACT_APP_TOKEN_COOKIE_NAME)
+      cookies.remove(process.env.REACT_APP_TOKEN_COOKIE_NAME);
+    if (process.env.REACT_APP_ADDRESS_COOKIE_NAME)
+      cookies.remove(process.env.REACT_APP_ADDRESS_COOKIE_NAME);
     if (window.localStorage.getItem("walletconnect")) {
       connectorsByName.walletconnect.close();
       connectorsByName.walletconnect.walletConnectProvider = null;
@@ -120,17 +133,17 @@ const useAuth = () => {
     provider: Web3Provider | undefined,
     dispatch: Dispatch<any>
   ) => {
-    var user_obj = [];
+    let user_obj = [];
 
     try {
       user_obj = await fetch(
         `${backendUrl}/vega/singleuser?publicAddress=${public_address}`
       ).then((response) => response.json());
-    } catch (err) {
-      toastError("Error", err.message);
+    } catch (error: any) {
+      toastError("Error", error.message);
     }
 
-    let current_user =
+    const current_user =
       user_obj.user && user_obj.user.length != 0
         ? {
             public_address: user_obj.user[0].public_address,
@@ -140,7 +153,7 @@ const useAuth = () => {
 
     // Popup MetaMask confirmation modal to sign message
     const message = `I am signing into vega NFT marketplace with my one-time nonce: ${current_user.nonce}`;
-    let mySignature = await signMessage(
+    const mySignature = await signMessage(
       connector,
       provider,
       current_user.public_address,
@@ -148,7 +161,7 @@ const useAuth = () => {
     );
 
     if (mySignature) {
-      let wallet_balance = await getBalance(account);
+      const wallet_balance = await getBalance(account);
       await dispatch(getMyBalance(wallet_balance));
       await dispatch(fetchAccessToken(account, mySignature));
       await dispatch(fetchAuthInfo(account));

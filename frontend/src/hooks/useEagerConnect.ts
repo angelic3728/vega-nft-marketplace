@@ -61,7 +61,7 @@ const useEagerConnect = () => {
   }, [account, activate, conActivate])
 
   const getBal = async (account: string) => {
-    let wallet_balance = await getBalance(account);
+    const wallet_balance = await getBalance(account);
     dispatch(getMyBalance(wallet_balance));
   }
 }

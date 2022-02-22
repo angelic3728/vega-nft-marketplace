@@ -9,7 +9,7 @@ import { Web3Provider } from "@ethersproject/providers";
 
 const POLLING_INTERVAL = 12000;
 const rpcUrl = process.env.REACT_APP_RPC_URL;
-const chainId = 3;
+const chainId = Number(process.env.REACT_APP_CHAIN_ID);
 
 const injected = new InjectedConnector({ supportedChainIds: [chainId] });
 

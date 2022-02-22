@@ -11,7 +11,7 @@ export const defaultState = {
   nftBreakdown: initEntityState(null),
   nftDetail: initEntityState(null),
   nftShowcase: initEntityState(null),
-  creationStatus:0,
+  creationStatus: 0,
 };
 
 const states = (state = defaultState, action) => {
@@ -21,7 +21,7 @@ const states = (state = defaultState, action) => {
         ...state,
         nftBreakdown: entityLoadingStarted(state.nftBreakdown, action.payload),
       };
-    case getType(actions.getNftBreakdown.success):
+    case getType(actions.getNftBreakdown.success): {
       //append existing data with new data
       let payload = state.nftBreakdown.data
         ? [...state.nftBreakdown.data, ...action.payload]
@@ -30,6 +30,7 @@ const states = (state = defaultState, action) => {
         ...state,
         nftBreakdown: entityLoadingSucceeded(state.nftBreakdown, payload),
       };
+    }
     case getType(actions.getNftBreakdown.failure):
       return {
         ...state,
@@ -66,7 +67,7 @@ const states = (state = defaultState, action) => {
       return { ...state, nftBreakdown: initEntityState(null) };
 
     case getType(actions.setCreationStatus):
-      return { ...state, creationStatus:action.payload };
+      return { ...state, creationStatus: action.payload };
 
     default:
       return state;

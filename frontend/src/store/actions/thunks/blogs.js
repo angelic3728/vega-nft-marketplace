@@ -18,7 +18,7 @@ export const getBlogPosts = (postId) => async (dispatch) => {
   }
 };
 
-export const getBlogComments = (postId) => async (dispatch) => {
+export const getBlogComments = () => async (dispatch) => {
 
   dispatch(actions.getComments.request(Canceler.cancel));
 
@@ -34,7 +34,7 @@ export const getBlogComments = (postId) => async (dispatch) => {
   }
 };
 
-export const getBlogTags = (postId) => async (dispatch) => {
+export const getBlogTags = () => async (dispatch) => {
 
   dispatch(actions.getTags.request(Canceler.cancel));
 

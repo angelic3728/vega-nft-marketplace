@@ -4,13 +4,13 @@ import { ModalProvider } from "@pancakeswap-libs/uikit";
 import { Web3ReactProvider } from "@web3-react/core";
 import { ToastsProvider } from "../contexts/ToastsContext";
 import { getLibrary } from "../utils/web3React";
-import { light, dark } from "@pancakeswap-libs/uikit";
+import { dark } from "@pancakeswap-libs/uikit";
 
 // redux store
 import { Provider } from "react-redux";
 import store from "../store";
 
-const ThemeProviderWrapper = (props: any) => {
+const ThemeProviderWrapper = (props) => {
   return <ThemeProvider theme={dark} {...props} />;
 };
 

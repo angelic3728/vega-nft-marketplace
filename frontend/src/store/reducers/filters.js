@@ -13,7 +13,7 @@ export const defaultState = {
 const states = (state = defaultState, action) => {
   const payload = action.payload;
   switch (action.type) {
-    case getType(actions.filterCategories):
+    case getType(actions.filterCategories): {
       let selectedCategories = payload.value
         ? handleSelection(
             state.selectedCategories,
@@ -22,8 +22,9 @@ const states = (state = defaultState, action) => {
           )
         : new Set();
       return { ...state, selectedCategories };
+    }
 
-    case getType(actions.filterStatus):
+    case getType(actions.filterStatus): {
       let selectedStatus = payload.value
         ? handleSelection(
             state.selectedStatus,
@@ -32,8 +33,9 @@ const states = (state = defaultState, action) => {
           )
         : new Set();
       return { ...state, selectedStatus };
+    }
 
-    case getType(actions.filterItemsType):
+    case getType(actions.filterItemsType): {
       let selectedItemsType = payload.value
         ? handleSelection(
             state.selectedItemsType,
@@ -42,8 +44,9 @@ const states = (state = defaultState, action) => {
           )
         : new Set();
       return { ...state, selectedItemsType };
+    }
 
-    case getType(actions.filterCollections):
+    case getType(actions.filterCollections): {
       let selectedCollections = payload.value
         ? handleSelection(
             state.selectedCollections,
@@ -52,11 +55,12 @@ const states = (state = defaultState, action) => {
           )
         : new Set();
       return { ...state, selectedCollections };
+    }
 
-    case getType(actions.filterNftTitle):
+    case getType(actions.filterNftTitle): {
       return { ...state, filterNftTitle: action.payload };
-
-    case getType(actions.clearFilter):
+    }
+    case getType(actions.clearFilter): {
       return {
         selectedCategories: new Set(),
         selectedStatus: new Set(),
@@ -64,7 +68,7 @@ const states = (state = defaultState, action) => {
         selectedCollections: new Set(),
         filterNftTitle: "",
       };
-
+    }
     default:
       return state;
   }

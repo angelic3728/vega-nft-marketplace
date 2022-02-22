@@ -1,7 +1,6 @@
 import { Axios, Canceler } from "../../../core/axios";
 import * as actions from "../../actions";
 import Cookies from "universal-cookie";
-import api from "../../../core/api";
 
 const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
@@ -35,7 +34,6 @@ export const fetchAccessToken =
 
 export const fetchAuthInfo = (public_address) => async (dispatch) => {
   dispatch(actions.getAuthInfo.request(Canceler.cancel));
-  var form = { publicAddress: public_address };
   try {
     let query = public_address ? "publicAddress=" + public_address : "";
     const { data } = await Axios.get(

@@ -31,7 +31,7 @@ const customStyles = {
     ...base,
     padding: 0
   }),
-  control: (base, state) => ({
+  control: (base) => ({
     ...base,
     padding: 2
   })

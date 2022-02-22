@@ -1,3 +1,4 @@
+import React from 'react';
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import {
@@ -59,16 +60,15 @@ const MintFlowModal = ({ createMethod, onDismiss }) => {
                 <Text textAlign="center">
                   Uploading assets and metadata to the IPFS storage.
                 </Text>
-                {creationStatus === 0 ?
-                <Skeleton
-                  mt="5px"
-                  animation="waves"
-                  variant="rect"
-                  width="100%"
-                  height={15}
-                />
-                :
-                null}
+                {creationStatus === 0 ? (
+                  <Skeleton
+                    mt="5px"
+                    animation="waves"
+                    variant="rect"
+                    width="100%"
+                    height={15}
+                  />
+                ) : null}
               </Box>
               {creationStatus !== 0 && (
                 <Flex width="10%" justifyContent="center">
@@ -85,79 +85,75 @@ const MintFlowModal = ({ createMethod, onDismiss }) => {
                 <Text textAlign="center">
                   Minting Asset for selling or auction.
                 </Text>
-                {creationStatus === 1 ?
-                <Skeleton
-                  mt="5px"
-                  animation="waves"
-                  variant="rect"
-                  width="100%"
-                  height={15}
-                />
-                :
-                null}
+                {creationStatus === 1 ? (
+                  <Skeleton
+                    mt="5px"
+                    animation="waves"
+                    variant="rect"
+                    width="100%"
+                    height={15}
+                  />
+                ) : null}
               </Box>
               {creationStatus !== 1 && (
                 <Flex width="10%" justifyContent="center">
-                  {creationStatus !== 0?<CheckBoxIcon />:<QueueIcon />}
+                  {creationStatus !== 0 ? <CheckBoxIcon /> : <QueueIcon />}
                 </Flex>
               )}
             </Flex>
           </CardBody>
         </CardWrapper>
-        {(createMethod===1 || createMethod===3) && <CardWrapper isActive={creationStatus === 2}>
-          <CardBody p="0px" px="4px" py="24px">
-            <Flex justifyContent="space-between">
-              <Box width={creationStatus === 2 ? "100%" : "90%"}>
-                <Text textAlign="center">
-                  Listing on marketplace
-                </Text>
-                {creationStatus === 2 ?
-                <Skeleton
-                  mt="5px"
-                  animation="waves"
-                  variant="rect"
-                  width="100%"
-                  height={15}
-                />
-                :
-                null}
-              </Box>
-              {creationStatus !== 2 && (
-                <Flex width="10%" justifyContent="center">
-                  {creationStatus < 2?<QueueIcon />:<CheckBoxIcon />}
-                </Flex>
-              )}
-            </Flex>
-          </CardBody>
-        </CardWrapper>}
+        {(createMethod === 1 || createMethod === 3) && (
+          <CardWrapper isActive={creationStatus === 2}>
+            <CardBody p="0px" px="4px" py="24px">
+              <Flex justifyContent="space-between">
+                <Box width={creationStatus === 2 ? "100%" : "90%"}>
+                  <Text textAlign="center">Listing on marketplace</Text>
+                  {creationStatus === 2 ? (
+                    <Skeleton
+                      mt="5px"
+                      animation="waves"
+                      variant="rect"
+                      width="100%"
+                      height={15}
+                    />
+                  ) : null}
+                </Box>
+                {creationStatus !== 2 && (
+                  <Flex width="10%" justifyContent="center">
+                    {creationStatus < 2 ? <QueueIcon /> : <CheckBoxIcon />}
+                  </Flex>
+                )}
+              </Flex>
+            </CardBody>
+          </CardWrapper>
+        )}
 
-        {(createMethod===2 || createMethod===3) && <CardWrapper isActive={creationStatus === 3}>
-          <CardBody p="0px" px="4px" py="24px">
-            <Flex justifyContent="space-between">
-              <Box width={creationStatus === 3 ? "100%" : "90%"}>
-                <Text textAlign="center">
-                  Open for Auction.
-                </Text>
-                {creationStatus === 3 ?
-                <Skeleton
-                  mt="5px"
-                  animation="waves"
-                  variant="rect"
-                  width="100%"
-                  height={15}
-                />
-                :
-                null}
-              </Box>
-              {creationStatus !== 3 && (
-                <Flex width="10%" justifyContent="center">
-                  {creationStatus<3?<QueueIcon />:<CheckBoxIcon />}
-                </Flex>
-              )}
-            </Flex>
-          </CardBody>
-        </CardWrapper>}
-        
+        {(createMethod === 2 || createMethod === 3) && (
+          <CardWrapper isActive={creationStatus === 3}>
+            <CardBody p="0px" px="4px" py="24px">
+              <Flex justifyContent="space-between">
+                <Box width={creationStatus === 3 ? "100%" : "90%"}>
+                  <Text textAlign="center">Open for Auction.</Text>
+                  {creationStatus === 3 ? (
+                    <Skeleton
+                      mt="5px"
+                      animation="waves"
+                      variant="rect"
+                      width="100%"
+                      height={15}
+                    />
+                  ) : null}
+                </Box>
+                {creationStatus !== 3 && (
+                  <Flex width="10%" justifyContent="center">
+                    {creationStatus < 3 ? <QueueIcon /> : <CheckBoxIcon />}
+                  </Flex>
+                )}
+              </Flex>
+            </CardBody>
+          </CardWrapper>
+        )}
       </ModalBody>
     </Modal>
   );

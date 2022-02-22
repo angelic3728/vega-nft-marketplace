@@ -1,7 +1,6 @@
+import React, { useEffect, useState } from "react";
 import Cookies from "universal-cookie";
-import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useWeb3React } from "@web3-react/core";
 import * as actions from "../../store/actions";
 import Breakpoint, {
   BreakpointProvider,
@@ -31,7 +30,7 @@ const NavLink = (props) => (
   />
 );
 
-const Header = function (props) {
+const Header = function () {
   const [openMenu, setOpenMenu] = useState(false);
   const dispatch = useDispatch();
   const accessTokenState = useSelector(selectors.accessTokenState);
@@ -39,7 +38,6 @@ const Header = function (props) {
   const authStatusState = useSelector(selectors.authStatusState);
   const myBalanceState = useSelector(selectors.myBalanceState);
   const cookies = new Cookies();
-  const { account } = useWeb3React();
 
   // UI operation part
   const handleMenuOpen = () => {
@@ -128,7 +126,7 @@ const Header = function (props) {
   }, [accessToken]);
 
   return (
-    <header className={`navbar white ${props.className}`} id="myHeader">
+    <header className="navbar white" id="myHeader">
       <div className="container">
         <div className="row w-100-nav">
           <div className="logo px-0">

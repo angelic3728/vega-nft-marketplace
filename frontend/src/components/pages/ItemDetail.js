@@ -14,7 +14,7 @@ import { StyledHeader } from '../Styles';
 //SWITCH VARIABLE FOR PAGE STYLE
 const theme = 'GREY'; //LIGHT, GREY, RETRO
 
-const ItemDetail = ({ nftId }) => {
+const ItemDetail = () => {
 
     const [openMenu0, setOpenMenu0] = React.useState(true);
     const [openMenu, setOpenMenu] = React.useState(false);
@@ -53,8 +53,8 @@ const ItemDetail = ({ nftId }) => {
     const [openCheckoutbid, setOpenCheckoutbid] = React.useState(false);
 
     useEffect(() => {
-        dispatch(fetchNftDetail(nftId));
-    }, [dispatch, nftId]);
+        dispatch(fetchNftDetail());
+    }, [dispatch]);
 
     return (
         <div className="greyscheme">

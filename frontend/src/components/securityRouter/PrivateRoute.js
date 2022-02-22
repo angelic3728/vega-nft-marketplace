@@ -1,4 +1,5 @@
-import { Router, Redirect } from "@reach/router";
+import React from "react";
+import { Redirect } from "@reach/router";
 
 function PrivateRoute({ comp, isAuthenticated, path }) {
   return (

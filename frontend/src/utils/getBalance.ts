@@ -3,10 +3,10 @@ import getRpcUrl from "./getRpcUrl";
 
 const RPC_URL = getRpcUrl();
 
-export const getBalance = async (account: string) => {
+export const getBalance = async (account: string|null|undefined) => {
   const web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL));
   if (account) {
-    var balance = await web3.eth.getBalance(account);
+    let balance = await web3.eth.getBalance(account);
     balance = web3.utils.fromWei(balance);
     return Number(balance);
   } else {

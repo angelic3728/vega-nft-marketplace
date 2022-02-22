@@ -11,7 +11,7 @@ import { StyledHeader } from '../Styles';
 //SWITCH VARIABLE FOR PAGE STYLE
 const theme = 'GREY'; //LIGHT, GREY, RETRO
 
-const Collection= function({ collectionId = 1 }) {
+const Collection= function() {
 const [openMenu, setOpenMenu] = React.useState(true);
 const [openMenu1, setOpenMenu1] = React.useState(false);
 const handleBtnClick = () => {
@@ -32,8 +32,8 @@ const hotCollectionsState = useSelector(selectors.hotCollectionsState);
 const hotCollections = hotCollectionsState.data ? hotCollectionsState.data[0] : {};
 
 useEffect(() => {
-    dispatch(fetchHotCollections(collectionId));
-}, [dispatch, collectionId]);
+    dispatch(fetchHotCollections(1));
+}, [dispatch]);
 
 return (
 <div className="greyscheme">

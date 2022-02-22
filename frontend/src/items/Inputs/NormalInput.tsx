@@ -25,6 +25,7 @@ const InputWrapper = styled.div`
 interface Props {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  value: string
 }
 
 const NormalInput: React.FC<Props> = ({

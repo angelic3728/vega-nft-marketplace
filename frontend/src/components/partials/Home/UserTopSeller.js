@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
 import api from '../../../core/api';
 
-//react functional component
 const UserTopSeller = ({ user }) => {
     return (
         <>

@@ -10,7 +10,7 @@ const BASE_SCAN_URL = process.env.REACT_APP_BASE_SCAN_URL;
 export const setupNetwork = async () => {
   const provider = window.ethereum;
   if (provider) {
-    const chainId = 3;
+    const chainId = Number(process.env.REACT_APP_CHAIN_ID);
     const chainType = "Test Network";
     try {
       await provider.request({
@@ -18,7 +18,7 @@ export const setupNetwork = async () => {
         params: [{ chainId: `0x${chainId.toString(16)}` }],
       });
       return true;
-    } catch (switchError) {
+    } catch (switchError:any) {
       console.log(switchError.message);
       if (switchError.code === 4902) {
         try {

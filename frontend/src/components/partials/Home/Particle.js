@@ -4,20 +4,19 @@ import Particles from "react-tsparticles";
 class Particle extends Component {
   constructor(props) {
     super(props);
-
-    this.particlesInit = this.particlesInit.bind(this);
-    this.particlesLoaded = this.particlesLoaded.bind(this);
+    // this.particlesInit = this.particlesInit.bind(this);
+    // this.particlesLoaded = this.particlesLoaded.bind(this);
   }
 
-  particlesInit(main) {
-    /*console.log(main);*/
+  // particlesInit(main) {
+  //   /*console.log(main);*/
 
-    // you can initialize the tsParticles instance (main) here, adding custom shapes or presets
-  }
+  //   // you can initialize the tsParticles instance (main) here, adding custom shapes or presets
+  // }
 
-  particlesLoaded(container) {
-    /*console.log(container);*/
-  }
+  // particlesLoaded(container) {
+  //   /*console.log(container);*/
+  // }
 
   render() {
     return (
